@@ -1,28 +1,25 @@
 "use strict";
+/// <reference path="../typings/tsd.d.ts" />
+var express = require("express");
 var http = require("http");
-var os = require("os");
-var fs = require("fs");
-var HttpServer = (function () {
-    function HttpServer(port) {
+var io = require("socket.io");
+var Server = (function () {
+    function Server(port) {
         this.nodePort = port;
+        this.app = express();
+        this.server = http.createServer(this.app);
+        this.sio = io(this.server);
+        this.server.listen(port);
+        console.log("listening on port :" + port);
+        this.sio.on('connection', this.OnConnection);
     }
-    HttpServer.prototype.onRequest = function (request, response) {
-        console.log('New request: ' + request.url);
-        fs.readFile('./index.html', function (err, data) {
-            if (err) {
-                throw err;
-            }
-            response.writeHead(200, { 'Content-Type': 'text/html' });
-            response.write(data);
-            response.end();
+    Server.prototype.OnConnection = function (socket) {
+        console.log("connection");
+        socket.on('echo', function (msg) {
+            socket.broadcast.emit('echo', msg);
         });
     };
-    HttpServer.prototype.onStart = function () {
-        var httpServer = http.createServer(this.onRequest);
-        httpServer.listen(this.nodePort);
-        console.log('Server listenning on http://' + os.hostname() + ':' + this.nodePort + '/');
-    };
-    return HttpServer;
+    return Server;
 }());
-var server = new HttpServer(8080).onStart();
+var server = new Server(8080);
 //# sourceMappingURL=app.js.map

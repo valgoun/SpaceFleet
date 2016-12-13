@@ -7,6 +7,13 @@
 </head>
 
 <body>
+    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
+    <script>
+    const socket = io("http://localhost:8080");
+    socket.emit('echo', prompt("Entrez votre message"));
+    socket.on('echo', function(msg) { alert(msg) });
+    </script>
+
 </body>
 
 </html>
