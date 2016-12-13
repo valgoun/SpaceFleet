@@ -9,20 +9,6 @@
 *                                               *
 ************************************************/
 
-// This needs to be global to avoid TS2403 in case lib.dom.d.ts is present in the same build
-interface Console {
-    Console: typeof NodeJS.Console;
-    assert(value: any, message?: string, ...optionalParams: any[]): void;
-    dir(obj: any, options?: {showHidden?: boolean, depth?: number, colors?: boolean}): void;
-    error(message?: any, ...optionalParams: any[]): void;
-    info(message?: any, ...optionalParams: any[]): void;
-    log(message?: any, ...optionalParams: any[]): void;
-    time(label: string): void;
-    timeEnd(label: string): void;
-    trace(message?: any, ...optionalParams: any[]): void;
-    warn(message?: any, ...optionalParams: any[]): void;
-}
-
 interface Error {
     stack?: string;
 }
@@ -47,7 +33,6 @@ interface WeakSetConstructor { }
 ************************************************/
 declare var process: NodeJS.Process;
 declare var global: NodeJS.Global;
-declare var console: Console;
 
 declare var __filename: string;
 declare var __dirname: string;
@@ -67,7 +52,7 @@ interface NodeRequire extends NodeRequireFunction {
     resolve(id: string): string;
     cache: any;
     extensions: any;
-    main: NodeModule | undefined;
+    main: NodeModule;
 }
 
 declare var require: NodeRequire;
@@ -78,7 +63,7 @@ interface NodeModule {
     id: string;
     filename: string;
     loaded: boolean;
-    parent: NodeModule | null;
+    parent: NodeModule;
     children: NodeModule[];
 }
 
@@ -247,11 +232,6 @@ declare var Buffer: {
 *                                               *
 ************************************************/
 declare namespace NodeJS {
-    export var Console: {
-        prototype: Console;
-        new(stdout: WritableStream, stderr?: WritableStream): Console;
-    }
-
     export interface ErrnoException extends Error {
         errno?: number;
         code?: string;
@@ -281,7 +261,7 @@ declare namespace NodeJS {
         readable: boolean;
         isTTY?: boolean;
         read(size?: number): string | Buffer;
-        setEncoding(encoding: string | null): void;
+        setEncoding(encoding: string): void;
         pause(): ReadableStream;
         resume(): ReadableStream;
         pipe<T extends WritableStream>(destination: T, options?: { end?: boolean; }): T;
@@ -399,7 +379,7 @@ declare namespace NodeJS {
         nextTick(callback: Function, ...args: any[]): void;
         umask(mask?: number): number;
         uptime(): number;
-        hrtime(time?: [number, number]): [number, number];
+        hrtime(time?: number[]): number[];
         domain: Domain;
 
         // Worker
@@ -571,30 +551,25 @@ declare module "querystring" {
 }
 
 declare module "events" {
-    class internal extends NodeJS.EventEmitter { }
+    export class EventEmitter extends NodeJS.EventEmitter {
+        static EventEmitter: EventEmitter;
+        static listenerCount(emitter: EventEmitter, event: string | symbol): number; // deprecated
+        static defaultMaxListeners: number;
 
-    namespace internal {
-        export class EventEmitter extends internal {
-            static listenerCount(emitter: EventEmitter, event: string | symbol): number; // deprecated
-            static defaultMaxListeners: number;
-
-            addListener(event: string | symbol, listener: Function): this;
-            on(event: string | symbol, listener: Function): this;
-            once(event: string | symbol, listener: Function): this;
-            prependListener(event: string | symbol, listener: Function): this;
-            prependOnceListener(event: string | symbol, listener: Function): this;
-            removeListener(event: string | symbol, listener: Function): this;
-            removeAllListeners(event?: string | symbol): this;
-            setMaxListeners(n: number): this;
-            getMaxListeners(): number;
-            listeners(event: string | symbol): Function[];
-            emit(event: string | symbol, ...args: any[]): boolean;
-            eventNames(): (string | symbol)[];
-            listenerCount(type: string | symbol): number;
-        }
+        addListener(event: string | symbol, listener: Function): this;
+        on(event: string | symbol, listener: Function): this;
+        once(event: string | symbol, listener: Function): this;
+        prependListener(event: string | symbol, listener: Function): this;
+        prependOnceListener(event: string | symbol, listener: Function): this;
+        removeListener(event: string | symbol, listener: Function): this;
+        removeAllListeners(event?: string | symbol): this;
+        setMaxListeners(n: number): this;
+        getMaxListeners(): number;
+        listeners(event: string | symbol): Function[];
+        emit(event: string | symbol, ...args: any[]): boolean;
+        eventNames(): (string | symbol)[];
+        listenerCount(type: string | symbol): number;
     }
-
-    export = internal;
 }
 
 declare module "http" {
@@ -1035,7 +1010,7 @@ declare module "cluster" {
 
 declare module "zlib" {
     import * as stream from "stream";
-    export interface ZlibOptions { chunkSize?: number; windowBits?: number; level?: number; memLevel?: number; strategy?: number; dictionary?: any; finishFlush?: number }
+    export interface ZlibOptions { chunkSize?: number; windowBits?: number; level?: number; memLevel?: number; strategy?: number; dictionary?: any; }
 
     export interface Gzip extends stream.Transform { }
     export interface Gunzip extends stream.Transform { }
@@ -1053,20 +1028,20 @@ declare module "zlib" {
     export function createInflateRaw(options?: ZlibOptions): InflateRaw;
     export function createUnzip(options?: ZlibOptions): Unzip;
 
-    export function deflate(buf: Buffer | string, callback: (error: Error, result: Buffer) => void): void;
-    export function deflateSync(buf: Buffer | string, options?: ZlibOptions): Buffer;
-    export function deflateRaw(buf: Buffer | string, callback: (error: Error, result: Buffer) => void): void;
-    export function deflateRawSync(buf: Buffer | string, options?: ZlibOptions): Buffer;
-    export function gzip(buf: Buffer, callback: (error: Error, result: Buffer) => void): void;
-    export function gzipSync(buf: Buffer, options?: ZlibOptions): Buffer;
-    export function gunzip(buf: Buffer, callback: (error: Error, result: Buffer) => void): void;
-    export function gunzipSync(buf: Buffer, options?: ZlibOptions): Buffer;
-    export function inflate(buf: Buffer, callback: (error: Error, result: Buffer) => void): void;
-    export function inflateSync(buf: Buffer, options?: ZlibOptions): Buffer;
-    export function inflateRaw(buf: Buffer, callback: (error: Error, result: Buffer) => void): void;
-    export function inflateRawSync(buf: Buffer, options?: ZlibOptions): Buffer;
-    export function unzip(buf: Buffer, callback: (error: Error, result: Buffer) => void): void;
-    export function unzipSync(buf: Buffer, options?: ZlibOptions): Buffer;
+    export function deflate(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function deflateSync(buf: Buffer, options?: ZlibOptions): any;
+    export function deflateRaw(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function deflateRawSync(buf: Buffer, options?: ZlibOptions): any;
+    export function gzip(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function gzipSync(buf: Buffer, options?: ZlibOptions): any;
+    export function gunzip(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function gunzipSync(buf: Buffer, options?: ZlibOptions): any;
+    export function inflate(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function inflateSync(buf: Buffer, options?: ZlibOptions): any;
+    export function inflateRaw(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function inflateRawSync(buf: Buffer, options?: ZlibOptions): any;
+    export function unzip(buf: Buffer, callback: (error: Error, result: any) => void): void;
+    export function unzipSync(buf: Buffer, options?: ZlibOptions): any;
 
     // Constants
     export var Z_NO_FLUSH: number;
@@ -1478,7 +1453,10 @@ declare module "readline" {
         (line: string, callback: (err: any, result: CompleterResult) => void): any;
     }
 
-    export type CompleterResult = [string[], string];
+    export interface CompleterResult {
+        completions: string[];
+        line: string;
+    }
 
     export interface ReadLineOptions {
         input: NodeJS.ReadableStream;
@@ -1858,7 +1836,6 @@ declare module "net" {
         localPort: number;
         bytesRead: number;
         bytesWritten: number;
-        destroyed: boolean;
 
         // Extended base methods
         end(): void;
@@ -3059,7 +3036,7 @@ declare module "tls" {
     }
 
     export interface Server extends net.Server {
-        close(callback?: Function): Server;
+        close(): Server;
         address(): { port: number; family: string; address: string; };
         addContext(hostName: string, credentials: {
             key: string;
