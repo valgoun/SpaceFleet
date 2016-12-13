@@ -22,6 +22,12 @@
     },
     "mime/mime.d.ts": {
       "commit": "6b3bc735ad028ca115c06721fb1c71ffc0e7a546"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "6b3bc735ad028ca115c06721fb1c71ffc0e7a546"
+    },
+    "socket.io-client/socket.io-client.d.ts": {
+      "commit": "6b3bc735ad028ca115c06721fb1c71ffc0e7a546"
     }
   }
 }

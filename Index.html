@@ -7,13 +7,48 @@
 </head>
 
 <body>
-    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
-    <script>
-    const socket = io("http://localhost:8080");
-    socket.emit('echo', prompt("Entrez votre message"));
-    socket.on('echo', function(msg) { alert(msg) });
-    </script>
+    <div id="SelectName">
+        <form>
+            Your Fleet name
+            <input type="text" name="fleetname" value="ArenaCommander" id="fleetname">
+            <button id="caca">GO!</button>
+        </form>
+    </div>
+    <div id="ChoosePanel">
+        <form>
+            <h2>Choose</h2>
+            <button>Create lobby</button>
+            <button>Join lobby</button>
+        </form>
+    </div>
+    <div id="CreateLobby">
+        <form>
+            <h2>Create Lobby</h2>
+            name :
+            <input type="text" name="lobbyName" value=""> <br> mdp :
+            <input type="text" name="mdp" value="">
+        </form>
+    </div>
+    <div id="SelectLobby">
+        <h2>Select Lobby</h2>
+        <form>
+            Lobbyname
+            <button>Connect</button>
+        </form>
+    </div>
+    <div id="Lobby">
+        <h2>Lobby name</h2>
+        <p>Fleet</p>
+        <form>
+            <button>Leave</button>
+            <button>Play</button>
+        </form>
+    </div>
 
+
+    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="build/lobby.js"></script>
 </body>
 
 </html>

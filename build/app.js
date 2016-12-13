@@ -15,8 +15,8 @@ var Server = (function () {
     }
     Server.prototype.OnConnection = function (socket) {
         console.log("connection");
-        socket.on('echo', function (msg) {
-            socket.broadcast.emit('echo', msg);
+        socket.on('fleetName', function (msg) {
+            console.log(msg);
         });
     };
     return Server;

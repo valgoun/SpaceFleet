@@ -22,11 +22,10 @@ class Server {
 
     OnConnection(socket: SocketIO.Socket) {
         console.log("connection");
-        socket.on('echo', (msg) => {
-            socket.broadcast.emit('echo', msg);
+        socket.on('fleetName', (msg) => {
+            console.log(msg);
         });
     }
-
 
 }
 
