@@ -5,8 +5,9 @@
     <title>Phaser Test</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="phaser/phaser.min.js"></script>
-    <script src="phaser/game.js"></script>
+    <script src="src/phaser.min.js"></script>
+    <script src="src/phaser.js"></script>
+    <script src="build/game.js"></script>
 </head>
 
 <body>
@@ -14,8 +15,6 @@
     <script src="http://localhost:8080/socket.io/socket.io.js"></script>
     <script>
     const socket = io("http://localhost:8080");
-    socket.emit('echo', prompt("Entrez votre message"));
-    socket.on('echo', function(msg) { alert(msg) });
     </script>
 
 </body>
