@@ -11,44 +11,45 @@
         <form>
             Your Fleet name
             <input type="text" name="fleetname" value="ArenaCommander" id="fleetname">
-            <button id="caca">GO!</button>
+            <button id="Go">GO!</button>
         </form>
     </div>
-    <div id="ChoosePanel">
-        <form>
-            <h2>Choose</h2>
-            <button>Create lobby</button>
-            <button>Join lobby</button>
-        </form>
-    </div>
-    <div id="CreateLobby">
-        <form>
-            <h2>Create Lobby</h2>
-            name :
-            <input type="text" name="lobbyName" value=""> <br> mdp :
-            <input type="text" name="mdp" value="">
-        </form>
-    </div>
-    <div id="SelectLobby">
-        <h2>Select Lobby</h2>
-        <form>
-            Lobbyname
-            <button>Connect</button>
-        </form>
-    </div>
-    <div id="Lobby">
-        <h2>Lobby name</h2>
-        <p>Fleet</p>
-        <form>
-            <button>Leave</button>
-            <button>Play</button>
-        </form>
-    </div>
+    <div id="ChoosePanel" style="display: none">
+<form>
+    <h2>Choose</h2>
+    <button id="Create">Create lobby</button>
+    <button id="Join">Join lobby</button>
+</form>
+</div>
+<div id="CreationLobby" style="display: none">
+<form>
+    <h2>Create Lobby</h2>
+    name :
+    <input type="text" name="lobbyName" value=""> <br> mdp :
+    <input type="text" name="mdp" value="">
+    <button id="CreateLobby">Create</button>
+</form>
+</div>
+<div id="SelectionLobby" style="display: none">
+<h2>Select Lobby</h2>
+<form>
+    Lobbyname
+    <button id="Connect">Connect</button>
+</form>
+</div>
+<div id="Lobby" style="display: none">
+<h2>Lobby name</h2>
+<p>Fleet</p>
+<form>
+    <button id="Leave">Leave</button>
+    <button id="Play">Play</button>
+</form>
+</div>
 
 
-    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="build/lobby.js"></script>
+<!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="build/lobby.js"></script>
 </body>
 
 </html>

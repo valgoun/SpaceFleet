@@ -6,8 +6,8 @@
         "outDir": "./build"
     },
     "include": [
+        "./typing/tsd.d.ts",
         "./src/app.ts",
-        "./src/lobby.ts",
-        "./typing/*"
+        "./src/lobby.ts"
     ]
 }
