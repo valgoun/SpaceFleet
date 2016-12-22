@@ -31,13 +31,21 @@ var Server = (function () {
         socket.on('CreateLobby', function (name, password) {
             _this.OnCreateLobby(name, password, socket);
         });
+        socket.on('refreshLobbyList', function () {
+            _this.OnRetrieveLobby(socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
         console.log("new player : " + name);
         this.players.push(new player_1.Player(0, name, socket));
     };
-    Server.prototype.OnRetrieveLobby = function () {
+    Server.prototype.OnRetrieveLobby = function (socket) {
+        var names = Array();
+        this.Games.forEach(function (lobby) {
+            names.push(lobby.Name);
+        });
+        socket.emit("LobbyList", names);
     };
     Server.prototype.OnJoin = function () {
     };

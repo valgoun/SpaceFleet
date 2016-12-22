@@ -41,6 +41,9 @@ class Server {
         socket.on('CreateLobby', (name, password) => {
             this.OnCreateLobby(name, password, socket);
         });
+        socket.on('refreshLobbyList', () => {
+            this.OnRetrieveLobby(socket);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -49,8 +52,12 @@ class Server {
         this.players.push(new Player(0, name, socket));
     }
 
-    OnRetrieveLobby() {
-
+    OnRetrieveLobby(socket: SocketIO.Socket) {
+        let names = Array<string>();
+        this.Games.forEach((lobby) => {
+            names.push(lobby.Name);
+        });
+        socket.emit("LobbyList", names);
     }
 
     OnJoin() {

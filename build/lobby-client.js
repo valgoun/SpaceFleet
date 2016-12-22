@@ -22,6 +22,7 @@ var LobbyClient = (function () {
         });
         $("#Join").click(function () {
             console.log("Join");
+            _this.socket.emit("refreshLobbyList");
             _this.ChoosePanel.hide();
             _this.SelectionLobby.show();
             return false;
@@ -61,6 +62,13 @@ var LobbyClient = (function () {
             $("#LobbyTitle").text(name);
             players.forEach(function (element) {
                 $("#LobbyTitle").after("<p>" + element + "<p>");
+            });
+        });
+        this.socket.on("LobbyList", function (entries) {
+            var contener = $("#Entries");
+            contener.empty();
+            entries.forEach(function (lobby) {
+                contener.append('<form>' + lobby + '<button id="Connect">Connect</button></form>');
             });
         });
     };
