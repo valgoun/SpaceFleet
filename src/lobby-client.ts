@@ -1,4 +1,6 @@
-class lobby {
+// import { Lobby } from "./lobby"
+
+class LobbyClient {
     socket: SocketIOClient.Socket;
 
     //the different scene of the lobby selection
@@ -47,13 +49,11 @@ class lobby {
             console.log("Name : " + name + " Password : " + password);
             this.socket.emit("CreateLobby", name, password);
             this.CreationLobby.hide();
-            this.ActualLobby.show();
             return false;
         });
         $("#Connect").click(() => {
             console.log("Connect");
             this.SelectionLobby.hide();
-            this.ActualLobby.show();
             return false;
         });
         $("#Leave").click(() => {
@@ -67,7 +67,17 @@ class lobby {
             return false;
         });
 
+        //socket binding
+        this.socket.on("LobbyConnection", (name: string, players: string[]) => {
+            this.ActualLobby.show();
+            $("#LobbyTitle").text(name);
+            players.forEach(element => {
+                $("#LobbyTitle").after("<p>" + element + "<p>");
+            });
+
+        });
+
     }
 }
 
-let lb = new lobby();
+let lb = new LobbyClient();

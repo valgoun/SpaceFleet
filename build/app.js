@@ -45,7 +45,9 @@ var Server = (function () {
         var p = this.players.filter(function (val) {
             return val.socket === socket;
         })[0];
-        this.Games.push(new lobby_1.Lobby(name, p, password));
+        var lobby = new lobby_1.Lobby(name, p, password);
+        this.Games.push(lobby);
+        socket.emit("LobbyConnection", lobby.Name, lobby.Players);
         console.log("-------------");
         console.log("Looby created");
         console.log("Host : " + p.name);

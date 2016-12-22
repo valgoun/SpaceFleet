@@ -61,7 +61,9 @@ class Server {
         let p = this.players.filter((val) => {
             return val.socket === socket
         })[0];
-        this.Games.push(new Lobby(name, p, password));
+        let lobby = new Lobby(name, p, password)
+        this.Games.push(lobby);
+        socket.emit("LobbyConnection", lobby.Name, lobby.Players);
         console.log("-------------");
         console.log("Looby created");
         console.log("Host : " + p.name);

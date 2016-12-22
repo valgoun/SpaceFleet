@@ -5,6 +5,8 @@ var Lobby = (function () {
         this.Name = name;
         this.Password = password;
         this.Host = host;
+        this.Players = new Array();
+        this.Players.push(host.name);
     }
     return Lobby;
 }());

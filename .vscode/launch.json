@@ -10,7 +10,9 @@
             "name": "Launch Program",
             "program": "${workspaceRoot}\\build/app.js",
             "cwd": "${workspaceRoot}",
-            "outFiles": [],
+            "outFiles": [
+                "${workspaceRoot}/build/*.js"
+            ],
             "sourceMaps": true
         },
         {
@@ -18,7 +20,9 @@
             "request": "attach",
             "name": "Attach to Process",
             "port": 5858,
-            "outFiles": [],
+            "outFiles": [
+                "${workspaceRoot}/build/*.js"
+            ],
             "sourceMaps": true
         }
     ]

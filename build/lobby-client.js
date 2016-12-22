@@ -1,9 +1,10 @@
-var lobby = (function () {
-    function lobby() {
+// import { Lobby } from "./lobby"
+var LobbyClient = (function () {
+    function LobbyClient() {
         this.socket = io.connect("http://localhost:8080");
         $(document).ready(this.Awake.bind(this));
     }
-    lobby.prototype.Awake = function () {
+    LobbyClient.prototype.Awake = function () {
         var _this = this;
         //div initialisation
         this.NameSelection = $("#SelectName");
@@ -37,13 +38,11 @@ var lobby = (function () {
             console.log("Name : " + name + " Password : " + password);
             _this.socket.emit("CreateLobby", name, password);
             _this.CreationLobby.hide();
-            _this.ActualLobby.show();
             return false;
         });
         $("#Connect").click(function () {
             console.log("Connect");
             _this.SelectionLobby.hide();
-            _this.ActualLobby.show();
             return false;
         });
         $("#Leave").click(function () {
@@ -56,8 +55,16 @@ var lobby = (function () {
             console.log("Play");
             return false;
         });
+        //socket binding
+        this.socket.on("LobbyConnection", function (name, players) {
+            _this.ActualLobby.show();
+            $("#LobbyTitle").text(name);
+            players.forEach(function (element) {
+                $("#LobbyTitle").after("<p>" + element + "<p>");
+            });
+        });
     };
-    return lobby;
+    return LobbyClient;
 }());
-var lb = new lobby();
+var lb = new LobbyClient();
 //# sourceMappingURL=lobby-client.js.map
