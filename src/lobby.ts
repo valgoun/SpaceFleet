@@ -9,7 +9,7 @@ class lobby {
     ActualLobby: JQuery;
 
     constructor() {
-        // this.socket = io.connect("http://localhost:8080");
+        this.socket = io.connect("http://localhost:8080");
         $(document).ready(this.Awake.bind(this));
     }
 
@@ -24,6 +24,7 @@ class lobby {
         //Button binding
         $("#Go").click(() => {
             console.log("Go");
+            this.socket.emit('fleetName', $("#fleetname").val());
             this.NameSelection.hide();
             this.ChoosePanel.show();
             return false;

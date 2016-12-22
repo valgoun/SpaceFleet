@@ -7,6 +7,7 @@
     },
     "include": [
         "./typing/tsd.d.ts",
+        "./src/S_player.ts",
         "./src/app.ts",
         "./src/lobby.ts"
     ]

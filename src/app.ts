@@ -1,13 +1,16 @@
 /// <reference path="../typings/tsd.d.ts" />
+/// <reference path="S_player.ts" />
 import express = require('express');
 import http = require('http');
 import io = require('socket.io');
+import {Player} from "./S_player"; 
 
 class Server {
     nodePort: number;
     app: express.Application;
     server: http.Server;
     sio: SocketIO.Server;
+    players : Player[];
 
     constructor(port: number) {
         this.nodePort = port;
@@ -16,17 +19,42 @@ class Server {
         this.sio = io(this.server);
         this.server.listen(port);
         console.log("listening on port :" + port);
-
-        this.sio.on('connection', this.OnConnection);
+        this.players = new Array<Player>();
+        this.sio.on('connection', this.OnConnection.bind(this));
     }
 
     OnConnection(socket: SocketIO.Socket) {
         console.log("connection");
-        socket.on('fleetName', (msg) => {
-            console.log(msg);
+
+        //msg function binding
+        socket.on('fleetName', (name)=>{
+            this.OnFleetName(name, socket);
+        });
+        socket.on('disconnect',()=>{
+            this.OnDisconnect(socket);
         });
     }
 
+    OnFleetName(name:string, socket:SocketIO.Socket){
+        console.log(name);
+        this.players.push(new Player(0, name,socket));
+        console.log(this.players.length);
+    }
+
+    OnJoin(){
+
+    }
+
+    OnCreate(){
+
+    }
+
+    OnDisconnect(socket:SocketIO.Socket){
+        this.players.splice(this.players.indexOf(this.players.filter((val)=>{
+            return val.socket === socket
+        })[0]), 1);
+        console.log(this.players.length);
+    }
 }
 
 let server = new Server(8080);

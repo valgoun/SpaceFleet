@@ -1,6 +1,6 @@
 var lobby = (function () {
     function lobby() {
-        // this.socket = io.connect("http://localhost:8080");
+        this.socket = io.connect("http://localhost:8080");
         $(document).ready(this.Awake.bind(this));
     }
     lobby.prototype.Awake = function () {
@@ -14,6 +14,7 @@ var lobby = (function () {
         //Button binding
         $("#Go").click(function () {
             console.log("Go");
+            _this.socket.emit('fleetName', $("#fleetname").val());
             _this.NameSelection.hide();
             _this.ChoosePanel.show();
             return false;
