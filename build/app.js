@@ -30,17 +30,19 @@ var Server = (function () {
     Server.prototype.OnFleetName = function (name, socket) {
         console.log(name);
         this.players.push(new S_player_1.Player(0, name, socket));
-        console.log(this.players.length);
     };
     Server.prototype.OnJoin = function () {
     };
     Server.prototype.OnCreate = function () {
     };
     Server.prototype.OnDisconnect = function (socket) {
-        this.players.splice(this.players.indexOf(this.players.filter(function (val) {
+        var p = this.players.filter(function (val) {
             return val.socket === socket;
-        })[0]), 1);
-        console.log(this.players.length);
+        })[0];
+        if (p) {
+            this.players.splice(this.players.indexOf(p), 1);
+            console.log("Fleet " + p.name + " has disconnected");
+        }
     };
     return Server;
 }());
