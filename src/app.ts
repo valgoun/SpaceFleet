@@ -1,9 +1,9 @@
 /// <reference path="../typings/tsd.d.ts" />
-/// <reference path="S_player.ts" />
 import express = require('express');
 import http = require('http');
 import io = require('socket.io');
-import { Player } from "./S_player";
+import { Player } from "./player";
+import { Lobby } from "./lobby";
 
 class Server {
     nodePort: number;
@@ -11,6 +11,7 @@ class Server {
     server: http.Server;
     sio: SocketIO.Server;
     players: Player[];
+    Games: Lobby[];
 
     constructor(port: number) {
         this.nodePort = port;
@@ -18,12 +19,16 @@ class Server {
         this.server = http.createServer(this.app);
         this.sio = io(this.server);
         this.server.listen(port);
-        console.log("listening on port :" + port);
         this.players = new Array<Player>();
+        this.Games = new Array<Lobby>();
+
+
+        console.log("listening on port :" + port);
         this.sio.on('connection', this.OnConnection.bind(this));
     }
 
     OnConnection(socket: SocketIO.Socket) {
+        console.log("----------");
         console.log("connection");
 
         //msg function binding
@@ -33,26 +38,51 @@ class Server {
         socket.on('disconnect', () => {
             this.OnDisconnect(socket);
         });
+        socket.on('CreateLobby', (name, password) => {
+            this.OnCreateLobby(name, password, socket);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
-        console.log(name);
+        console.log("------------------------------");
+        console.log("new player : " + name);
         this.players.push(new Player(0, name, socket));
+    }
+
+    OnRetrieveLobby() {
+
     }
 
     OnJoin() {
 
     }
 
-    OnCreate() {
-
+    OnCreateLobby(name: string, password: string, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        this.Games.push(new Lobby(name, p, password));
+        console.log("-------------");
+        console.log("Looby created");
+        console.log("Host : " + p.name);
+        console.log("Lobby name : " + name);
+        console.log("password : " + password);
     }
 
     OnDisconnect(socket: SocketIO.Socket) {
+        console.log("-------------------");
+        console.log("disconnection");
         let p = this.players.filter((val) => {
             return val.socket === socket
         })[0];
         if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Host === p;
+            })[0];
+            if (g) {
+                this.Games.splice(this.Games.indexOf(g), 1);
+                console.log("Lobby[" + g.Name + "] has been destroyed because host has disconnected");
+            }
             this.players.splice(this.players.indexOf(p), 1);
             console.log("Fleet " + p.name + " has disconnected");
         }

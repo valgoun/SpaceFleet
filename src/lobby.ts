@@ -1,70 +1,15 @@
-class lobby {
-    socket: SocketIOClient.Socket;
+import { Player } from "./player";
 
-    //the different scene of the lobby selection
-    NameSelection: JQuery;
-    ChoosePanel: JQuery;
-    CreationLobby: JQuery;
-    SelectionLobby: JQuery;
-    ActualLobby: JQuery;
 
-    constructor() {
-        this.socket = io.connect("http://localhost:8080");
-        $(document).ready(this.Awake.bind(this));
-    }
+export class Lobby {
+    Name: string;
+    Password: string;
+    Host: Player;
+    Players: Player[];
 
-    Awake() {
-        //div initialisation
-        this.NameSelection = $("#SelectName");
-        this.ChoosePanel = $("#ChoosePanel");
-        this.CreationLobby = $("#CreationLobby");
-        this.SelectionLobby = $("#SelectionLobby");
-        this.ActualLobby = $("#Lobby");
-
-        //Button binding
-        $("#Go").click(() => {
-            console.log("Go");
-            this.socket.emit('fleetName', $("#fleetname").val());
-            this.NameSelection.hide();
-            this.ChoosePanel.show();
-            return false;
-        });
-        $("#Join").click(() => {
-            console.log("Join");
-            this.ChoosePanel.hide();
-            this.SelectionLobby.show();
-            return false;
-        });
-        $("#Create").click(() => {
-            console.log("Create");
-            this.ChoosePanel.hide();
-            this.CreationLobby.show();
-            return false;
-        });
-        $("#CreateLobby").click(() => {
-            console.log("CreateLobby");
-            this.CreationLobby.hide();
-            this.ActualLobby.show();
-            return false;
-        });
-        $("#Connect").click(() => {
-            console.log("Connect");
-            this.SelectionLobby.hide();
-            this.ActualLobby.show();
-            return false;
-        });
-        $("#Leave").click(() => {
-            console.log("Leave");
-            this.ActualLobby.hide();
-            this.SelectionLobby.show();
-            return false;
-        });
-        $("#Play").click(() => {
-            console.log("Play");
-            return false;
-        });
-
+    constructor(name: string, host: Player, password = "") {
+        this.Name = name;
+        this.Password = password;
+        this.Host = host;
     }
 }
-
-let lb = new lobby();

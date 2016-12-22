@@ -1,10 +1,10 @@
 "use strict";
 /// <reference path="../typings/tsd.d.ts" />
-/// <reference path="S_player.ts" />
 var express = require("express");
 var http = require("http");
 var io = require("socket.io");
-var S_player_1 = require("./S_player");
+var player_1 = require("./player");
+var lobby_1 = require("./lobby");
 var Server = (function () {
     function Server(port) {
         this.nodePort = port;
@@ -12,12 +12,14 @@ var Server = (function () {
         this.server = http.createServer(this.app);
         this.sio = io(this.server);
         this.server.listen(port);
-        console.log("listening on port :" + port);
         this.players = new Array();
+        this.Games = new Array();
+        console.log("listening on port :" + port);
         this.sio.on('connection', this.OnConnection.bind(this));
     }
     Server.prototype.OnConnection = function (socket) {
         var _this = this;
+        console.log("----------");
         console.log("connection");
         //msg function binding
         socket.on('fleetName', function (name) {
@@ -26,20 +28,44 @@ var Server = (function () {
         socket.on('disconnect', function () {
             _this.OnDisconnect(socket);
         });
+        socket.on('CreateLobby', function (name, password) {
+            _this.OnCreateLobby(name, password, socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
-        console.log(name);
-        this.players.push(new S_player_1.Player(0, name, socket));
+        console.log("------------------------------");
+        console.log("new player : " + name);
+        this.players.push(new player_1.Player(0, name, socket));
+    };
+    Server.prototype.OnRetrieveLobby = function () {
     };
     Server.prototype.OnJoin = function () {
     };
-    Server.prototype.OnCreate = function () {
+    Server.prototype.OnCreateLobby = function (name, password, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        this.Games.push(new lobby_1.Lobby(name, p, password));
+        console.log("-------------");
+        console.log("Looby created");
+        console.log("Host : " + p.name);
+        console.log("Lobby name : " + name);
+        console.log("password : " + password);
     };
     Server.prototype.OnDisconnect = function (socket) {
+        console.log("-------------------");
+        console.log("disconnection");
         var p = this.players.filter(function (val) {
             return val.socket === socket;
         })[0];
         if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Host === p;
+            })[0];
+            if (g) {
+                this.Games.splice(this.Games.indexOf(g), 1);
+                console.log("Lobby[" + g.Name + "] has been destroyed because host has disconnected");
+            }
             this.players.splice(this.players.indexOf(p), 1);
             console.log("Fleet " + p.name + " has disconnected");
         }

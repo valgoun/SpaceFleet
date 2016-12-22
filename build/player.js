@@ -12,4 +12,4 @@ var Player = (function () {
     return Player;
 }());
 exports.Player = Player;
-//# sourceMappingURL=S_player.js.map
+//# sourceMappingURL=player.js.map
