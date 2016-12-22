@@ -1,62 +1,98 @@
 //Phaser = require('phaser');
 ///<reference path="../typings/phaser/phaser.d.ts" />
 
+  let shipWidth: number = 40;
+  let shipHeight: number = 40;
+
+  let shipSpeed: number = 300;
+  let shipRotationSpeed = 300;
+  let shipDrag = 70;
+  let shipMaxVelocity = 200;
+
 class SimpleGame {
 
     constructor() {
-        this.game = new Phaser.Game(1280, 720, Phaser.AUTO, 'content', { preload: this.preload, create: this.create, update: this.update });
+        this.game = new Phaser.Game(1280, 720, Phaser.AUTO, 'content', { preload: this.preload, create: this.create, update: this.update, 
+            createSprite: this.createSprite, shipsMovement: this.shipsMovement, createShip: this.createShip});
     }
 
     game: Phaser.Game;
-    sprite: Phaser.Sprite;
     cursors: Phaser.CursorKeys;
+
+    ships: Phaser.Sprite[];
 
     preload() {
         this.game.load.image('ship', 'src/assets/Ship.png');
     }
 
     create() {
-        //  this.createSprite('ship', 400, 300, 40, 40);
-
-        this.sprite = this.game.add.sprite(400, 300, 'ship');
-        this.sprite.width = 40;
-        this.sprite.height = 40;
-        this.sprite.anchor.set(0.5);
-
-        this.game.physics.arcade.enable(this.sprite);
-        this.sprite.body.drag.set(70);
-        this.sprite.body.maxVelocity.set(200);
-
         this.cursors = this.game.input.keyboard.createCursorKeys();
+        this.ships = [];
+
+        this.createShip(0);
+        this.createShip(1);
+    }
+
+    createShip(shipIndex: number)
+    {
+        this.ships[shipIndex] = this.createSprite('ship', 400, 300, shipHeight, shipWidth);
+
+        this.game.physics.arcade.enable(this.ships[shipIndex]);
+        this.ships[shipIndex].body.drag.set(shipDrag);
+        this.ships[shipIndex].body.maxVelocity.set(shipMaxVelocity);
     }
 
     createSprite(name: string, x: number, y: number, width: number, height: number) {
-        this.sprite = this.game.add.sprite(x, y, name);
-        this.sprite.width = width;
-        this.sprite.height = height;
-        this.sprite.anchor.set(0.5);
+        let sprite = this.game.add.sprite(x, y, name);
+        sprite.width = width;
+        sprite.height = height;
+        sprite.anchor.set(0.5);
+
+        return sprite;
     }
 
     update() {
-        this.game.physics.arcade.accelerationFromRotation(this.sprite.rotation, 300, this.sprite.body.acceleration);
+        this.shipsMovement();
+    }
 
-        if (this.cursors.left.isDown) {
-            this.sprite.body.angularVelocity = -300;
-        }
-        else if (this.cursors.right.isDown) {
-            this.sprite.body.angularVelocity = 300;
-        }
-        else {
-            this.sprite.body.angularVelocity = 0;
+    shipsMovement()
+    {
+        for(let i = 0; i < this.ships.length; i++)
+            if(typeof this.ships[i] !== 'undefined')
+            {
+                this.game.physics.arcade.accelerationFromRotation(this.ships[i].rotation, shipSpeed, this.ships[i].body.acceleration);
+                this.game.world.wrap(this.ships[i], 16);
+            }
+        
+        if(typeof this.ships[0] !== 'undefined')
+        {
+            if (this.game.input.keyboard.isDown(Phaser.Keyboard.Q)) {
+                this.ships[0].body.angularVelocity = -shipRotationSpeed;
+            }
+            else if (this.game.input.keyboard.isDown(Phaser.Keyboard.D)) {
+                this.ships[0].body.angularVelocity = shipRotationSpeed;
+            }
+            else {
+                this.ships[0].body.angularVelocity = 0;
+            }
         }
 
-        this.game.world.wrap(this.sprite, 16);
+        if(typeof this.ships[1] !== 'undefined')
+        {   
+            if (this.game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+                this.ships[1].body.angularVelocity = -shipRotationSpeed;
+            }
+            else if (this.game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+                this.ships[1].body.angularVelocity = shipRotationSpeed;
+            }
+            else {
+                this.ships[1].body.angularVelocity = 0;
+            }
+        }
     }
 
 }
 
 window.onload = () => {
-
     var game = new SimpleGame();
-
 };
