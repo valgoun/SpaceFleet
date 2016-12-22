@@ -34,6 +34,9 @@ var Server = (function () {
         socket.on('refreshLobbyList', function () {
             _this.OnRetrieveLobby(socket);
         });
+        socket.on('Join', function (lobby) {
+            _this.OnJoin(socket, lobby);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -47,7 +50,22 @@ var Server = (function () {
         });
         socket.emit("LobbyList", names);
     };
-    Server.prototype.OnJoin = function () {
+    Server.prototype.OnJoin = function (socket, lobbyName) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (!p) {
+            socket.emit("Error", "A non player socket try to connect to a lobby");
+        }
+        else {
+            var g = this.Games.filter(function (val) {
+                return val.Name === lobbyName;
+            })[0];
+            g.Players.push(p.name);
+            socket.emit("LobbyConnection", g.Name, g.Players);
+            socket.join(g.Name);
+            socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
+        }
     };
     Server.prototype.OnCreateLobby = function (name, password, socket) {
         var p = this.players.filter(function (val) {
@@ -56,6 +74,7 @@ var Server = (function () {
         var lobby = new lobby_1.Lobby(name, p, password);
         this.Games.push(lobby);
         socket.emit("LobbyConnection", lobby.Name, lobby.Players);
+        socket.join(lobby.Name);
         console.log("-------------");
         console.log("Looby created");
         console.log("Host : " + p.name);

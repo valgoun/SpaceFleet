@@ -44,6 +44,9 @@ class Server {
         socket.on('refreshLobbyList', () => {
             this.OnRetrieveLobby(socket);
         });
+        socket.on('Join', (lobby: string) => {
+            this.OnJoin(socket, lobby);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -60,8 +63,21 @@ class Server {
         socket.emit("LobbyList", names);
     }
 
-    OnJoin() {
-
+    OnJoin(socket: SocketIO.Socket, lobbyName: string) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (!p) {
+            socket.emit("Error", "A non player socket try to connect to a lobby");
+        } else {
+            let g = this.Games.filter((val) => {
+                return val.Name === lobbyName;
+            })[0];
+            g.Players.push(p.name);
+            socket.emit("LobbyConnection", g.Name, g.Players);
+            socket.join(g.Name);
+            socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
+        }
     }
 
     OnCreateLobby(name: string, password: string, socket: SocketIO.Socket) {
@@ -71,6 +87,7 @@ class Server {
         let lobby = new Lobby(name, p, password)
         this.Games.push(lobby);
         socket.emit("LobbyConnection", lobby.Name, lobby.Players);
+        socket.join(lobby.Name);
         console.log("-------------");
         console.log("Looby created");
         console.log("Host : " + p.name);

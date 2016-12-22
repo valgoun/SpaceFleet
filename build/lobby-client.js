@@ -41,11 +41,6 @@ var LobbyClient = (function () {
             _this.CreationLobby.hide();
             return false;
         });
-        $("#Connect").click(function () {
-            console.log("Connect");
-            _this.SelectionLobby.hide();
-            return false;
-        });
         $("#Leave").click(function () {
             console.log("Leave");
             _this.ActualLobby.hide();
@@ -67,9 +62,19 @@ var LobbyClient = (function () {
         this.socket.on("LobbyList", function (entries) {
             var contener = $("#Entries");
             contener.empty();
-            entries.forEach(function (lobby) {
-                contener.append('<form>' + lobby + '<button id="Connect">Connect</button></form>');
+            entries.forEach(function (lobby, index) {
+                contener.append('<form>' + lobby + '<button id="' + index + 'Btn">Connect</button></form>');
+                $("#" + index + 'Btn').click(function () {
+                    console.log(lobby);
+                    _this.socket.emit("Join", lobby);
+                    _this.SelectionLobby.hide();
+                    return false;
+                });
             });
+        });
+        this.socket.on("PlayerJoined", function (name) {
+            console.log("caca");
+            $("#LobbyTitle").after("<p>" + name + "</p>");
         });
     };
     return LobbyClient;

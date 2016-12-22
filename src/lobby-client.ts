@@ -54,11 +54,6 @@ class LobbyClient {
             this.CreationLobby.hide();
             return false;
         });
-        $("#Connect").click(() => {
-            console.log("Connect");
-            this.SelectionLobby.hide();
-            return false;
-        });
         $("#Leave").click(() => {
             console.log("Leave");
             this.ActualLobby.hide();
@@ -81,9 +76,19 @@ class LobbyClient {
         this.socket.on("LobbyList", (entries: string[]) => {
             let contener = $("#Entries");
             contener.empty();
-            entries.forEach((lobby) => {
-                contener.append('<form>' + lobby + '<button id="Connect">Connect</button></form>');
+            entries.forEach((lobby, index) => {
+                contener.append('<form>' + lobby + '<button id="' + index + 'Btn">Connect</button></form>');
+                $("#" + index + 'Btn').click(() => {
+                    console.log(lobby);
+                    this.socket.emit("Join", lobby);
+                    this.SelectionLobby.hide();
+                    return false;
+                });
             });
+        });
+        this.socket.on("PlayerJoined", (name: string) => {
+            console.log("caca");
+            $("#LobbyTitle").after("<p>" + name + "</p>");
         });
 
     }
