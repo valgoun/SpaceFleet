@@ -1,5 +1,5 @@
-const screenWidth = 500;
-const screenHeight = 500;
+const screenWidth = 700;
+const screenHeight = 700;
 
 const shipWidth: number = 40;
 const shipHeight: number = 40;
@@ -21,7 +21,7 @@ const motherShipsPosition =
     { x: screenWidth * 0.2, y: screenHeight * 0.5 },
     { x: screenWidth * 0.8, y: screenHeight * 0.5 }];
 
-const motherShipsAngles = [0, 180, 270, 90];
+const motherShipsAngles = [0, 180, 90, 270];
 
 class SimpleGame {
 
@@ -48,8 +48,9 @@ class SimpleGame {
 
     create() {
         this.ships = [];
-        for (let i = 0; i < this.ships.length; i++)
+        for (let i = 0; i < 4; i++) {
             this.ships[i] = [];
+        }
 
         this.motherShips = [];
 
@@ -57,12 +58,25 @@ class SimpleGame {
         this.shipsGroup = this.game.add.group();
 
         this.createMotherShip(true);
-        //this.createMotherShip(false);
-        //this.createMotherShip(false);
+        this.createMotherShip(false);
+        this.createMotherShip(false);
+        this.createMotherShip(false);
 
         this.createShip(playerMotherShipIndex, 0);
         this.createShip(playerMotherShipIndex, 1);
         this.createShip(playerMotherShipIndex, 2);
+
+        this.createShip(1, 0);
+        this.createShip(1, 1);
+        this.createShip(1, 2);
+
+        this.createShip(2, 0);
+        this.createShip(2, 1);
+        this.createShip(2, 2);
+
+        this.createShip(3, 0);
+        this.createShip(3, 1);
+        this.createShip(3, 2);
     }
 
     createMotherShip(playerMotherShip: boolean) {
@@ -86,20 +100,20 @@ class SimpleGame {
     createShip(motherShipIndex: number, shipIndex: number) {
         this.ships[motherShipIndex][shipIndex] = this.createSprite('Ship', this.getShipSpawnPosition(shipIndex, motherShipIndex), shipHeight, shipWidth);
 
-        this.game.physics.arcade.enable(this.ships[shipIndex]);
+        this.game.physics.arcade.enable(this.ships[motherShipIndex][shipIndex]);
         this.ships[motherShipIndex][shipIndex].body.drag.set(shipDrag);
         this.ships[motherShipIndex][shipIndex].body.maxVelocity.set(shipMaxVelocity);
 
         this.ships[motherShipIndex][shipIndex].angle = this.motherShips[motherShipIndex].angle - 90;
 
-        this.shipsGroup.add(this.ships[shipIndex]);
+        this.shipsGroup.add(this.ships[motherShipIndex][shipIndex]);
     }
 
     getShipSpawnPosition(shipIndex: number, motherShipIndex: number) {
         let x = 0;
         let y = 0;
 
-        if (motherShipIndex < 3) {
+        if (motherShipIndex < 2) {
             y = this.motherShips[motherShipIndex].position.y;
             x = this.motherShips[motherShipIndex].position.x;
 
@@ -115,7 +129,7 @@ class SimpleGame {
             }
         }
 
-        if (motherShipIndex > 2) {
+        else {
             y = this.motherShips[motherShipIndex].position.y;
             x = this.motherShips[motherShipIndex].position.x;
 
@@ -144,19 +158,19 @@ class SimpleGame {
     }
 
     update() {
-        //this.shipsMovement();
+        this.shipsMovement();
 
         this.game.world.bringToTop(this.shipsGroup);
     }
 
     shipsMovement() {
-        for (let i = 0; i < this.ships.length; i++)
-            if (typeof this.ships[i] !== 'undefined') {
+        for (let i = 0; i < this.ships[playerMotherShipIndex].length; i++)
+            if (typeof this.ships[playerMotherShipIndex][i] !== 'undefined') {
                 this.game.physics.arcade.accelerationFromRotation(this.ships[playerMotherShipIndex][i].rotation, shipSpeed, this.ships[playerMotherShipIndex][i].body.acceleration);
-                this.game.world.wrap(this.ships[i], 16);
+                this.game.world.wrap(this.ships[playerMotherShipIndex][i], 16);
             }
 
-        if (typeof this.ships[0] !== 'undefined') {
+        if (typeof this.ships[playerMotherShipIndex][0] !== 'undefined') {
             if (this.game.input.keyboard.isDown(Phaser.Keyboard.Q)) {
                 this.ships[playerMotherShipIndex][0].body.angularVelocity = -shipRotationSpeed;
             }
@@ -168,7 +182,7 @@ class SimpleGame {
             }
         }
 
-        if (typeof this.ships[1] !== 'undefined') {
+        if (typeof this.ships[playerMotherShipIndex][1] !== 'undefined') {
             if (this.game.input.keyboard.isDown(Phaser.Keyboard.K)) {
                 this.ships[playerMotherShipIndex][1].body.angularVelocity = -shipRotationSpeed;
             }
@@ -180,7 +194,7 @@ class SimpleGame {
             }
         }
 
-        if (typeof this.ships[2] !== 'undefined') {
+        if (typeof this.ships[playerMotherShipIndex][2] !== 'undefined') {
             if (this.game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
                 this.ships[playerMotherShipIndex][2].body.angularVelocity = -shipRotationSpeed;
             }
