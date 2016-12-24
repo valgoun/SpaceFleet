@@ -80,6 +80,8 @@ class Server {
             socket.emit("LobbyConnection", g.Name, g.Players);
             socket.join(g.Name);
             socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
+            if (g.Players.length == 2)
+                g.Host.socket.emit("GameReady");
         }
     }
 
@@ -140,6 +142,8 @@ class Server {
             g.Players.splice(g.Players.indexOf(p.name), 1);
             socket.to(g.Name).broadcast.emit("PlayerLeave", p.name);
             socket.leave(g.Name);
+            if (g.Players.length == 1)
+                g.Host.socket.emit("GameNotReady");
         }
     }
 
