@@ -40,6 +40,9 @@ var Server = (function () {
         socket.on('Leave', function () {
             _this.OnLeave(socket);
         });
+        socket.on('Play', function () {
+            _this.OnPlay(socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -129,6 +132,30 @@ var Server = (function () {
             socket.leave(g.Name);
             if (g.Players.length == 1)
                 g.Host.socket.emit("GameNotReady");
+        }
+    };
+    Server.prototype.OnPlay = function (socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (!p) {
+            console.error("a non player socket try to launch a game");
+            return;
+        }
+        var g = this.Games.filter(function (val) {
+            return val.Players.indexOf(p.name) != -1;
+        })[0];
+        if (!g) {
+            console.error("a player try to launch a game but was in no game");
+            return;
+        }
+        if (p === g.Host) {
+            socket.to(g.Name).broadcast.emit("LaunchGame", g.Players);
+            socket.emit("LaunchGame", g.Players);
+        }
+        else {
+            console.error("a player try to launch a game but he isn't the host");
+            return;
         }
     };
     //when host of a game disconnect or leave

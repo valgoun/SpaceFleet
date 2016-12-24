@@ -10,6 +10,9 @@ class LobbyClient {
     SelectionLobby: JQuery;
     ActualLobby: JQuery;
 
+    //the name of the local player
+    LocalName: string;
+
     constructor() {
         this.socket = io.connect("http://localhost:8080");
         $(document).ready(this.Awake.bind(this));
@@ -27,6 +30,7 @@ class LobbyClient {
         $("#Go").click(() => {
             console.log("Go");
             this.socket.emit('fleetName', $("#fleetname").val());
+            this.LocalName = $("#fleetname").val();
             this.NameSelection.hide();
             this.ChoosePanel.show();
             return false;
@@ -65,6 +69,7 @@ class LobbyClient {
         });
         $("#Play").click(() => {
             console.log("Play");
+            this.socket.emit("Play");
             return false;
         });
 
@@ -102,6 +107,14 @@ class LobbyClient {
         });
         this.socket.on("GameNotReady", () => {
             $("#Play").hide();
+        });
+        this.socket.on("LaunchGame", (players: string[]) => {
+            this.ActualLobby.hide();
+            //LAUNCH THE GAME
+            /*
+            players is the players list
+            use this and LocalName to get the player id if needed
+            */
         });
 
     }

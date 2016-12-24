@@ -50,6 +50,9 @@ class Server {
         socket.on('Leave', () => {
             this.OnLeave(socket);
         });
+        socket.on('Play', () => {
+            this.OnPlay(socket);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -144,6 +147,31 @@ class Server {
             socket.leave(g.Name);
             if (g.Players.length == 1)
                 g.Host.socket.emit("GameNotReady");
+        }
+    }
+
+    OnPlay(socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket;
+        })[0];
+        if (!p) {
+            console.error("a non player socket try to launch a game");
+            return;
+        }
+        let g = this.Games.filter((val) => {
+            return val.Players.indexOf(p.name) != -1;
+        })[0];
+        if (!g) {
+            console.error("a player try to launch a game but was in no game");
+            return;
+        }
+        if (p === g.Host) {
+            socket.to(g.Name).broadcast.emit("LaunchGame", g.Players);
+            socket.emit("LaunchGame", g.Players);
+        }
+        else {
+            console.error("a player try to launch a game but he isn't the host");
+            return;
         }
     }
 

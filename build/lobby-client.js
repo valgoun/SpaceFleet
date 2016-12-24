@@ -16,6 +16,7 @@ var LobbyClient = (function () {
         $("#Go").click(function () {
             console.log("Go");
             _this.socket.emit('fleetName', $("#fleetname").val());
+            _this.LocalName = $("#fleetname").val();
             _this.NameSelection.hide();
             _this.ChoosePanel.show();
             return false;
@@ -52,6 +53,7 @@ var LobbyClient = (function () {
         });
         $("#Play").click(function () {
             console.log("Play");
+            _this.socket.emit("Play");
             return false;
         });
         //socket binding
@@ -88,6 +90,14 @@ var LobbyClient = (function () {
         });
         this.socket.on("GameNotReady", function () {
             $("#Play").hide();
+        });
+        this.socket.on("LaunchGame", function (players) {
+            _this.ActualLobby.hide();
+            //LAUNCH THE GAME
+            /*
+            players is the players list
+            use this and LocalName to get the player id if needed
+            */
         });
     };
     return LobbyClient;
