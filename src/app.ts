@@ -74,7 +74,7 @@ class Server {
             return val.socket === socket
         })[0];
         if (!p) {
-            socket.emit("Error", "A non player socket try to connect to a lobby");
+            console.error("A non player socket try to connect to a lobby");
         } else {
             let g = this.Games.filter((val) => {
                 return val.Name === lobbyName;
@@ -111,11 +111,16 @@ class Server {
         })[0];
         if (p) {
             let g = this.Games.filter((val) => {
-                return val.Host === p;
+                return val.Players.indexOf(p.name) !== -1;
             })[0];
             if (g) {
-                this.Games.splice(this.Games.indexOf(g), 1);
-                console.log("Lobby[" + g.Name + "] has been destroyed because host has disconnected");
+                g.Players.splice(g.Players.indexOf(p.name), 1);
+                socket.to(g.Name).broadcast.emit("PlayerLeave", p.name);
+                socket.leave(g.Name);
+                if (g.Host === p)
+                    this.ReHost(g);
+                else if (g.Players.length === 1)
+                    g.Host.socket.emit("GameNotReady");
             }
             this.players.splice(this.players.indexOf(p), 1);
             console.log("Fleet " + p.name + " has disconnected");
@@ -139,15 +144,14 @@ class Server {
             console.error("a player try to leave a lobby but he was in no lobby");
             return;
         }
+        g.Players.splice(g.Players.indexOf(p.name), 1);
+        socket.to(g.Name).broadcast.emit("PlayerLeave", p.name);
+        socket.leave(g.Name);
         if (p === g.Host)
             this.ReHost(g);
-        else {
-            g.Players.splice(g.Players.indexOf(p.name), 1);
-            socket.to(g.Name).broadcast.emit("PlayerLeave", p.name);
-            socket.leave(g.Name);
-            if (g.Players.length == 1)
-                g.Host.socket.emit("GameNotReady");
-        }
+        else if (g.Players.length === 1)
+            g.Host.socket.emit("GameNotReady");
+
     }
 
     OnPlay(socket: SocketIO.Socket) {
@@ -177,7 +181,12 @@ class Server {
 
     //when host of a game disconnect or leave
     ReHost(game: Lobby) {
-
+        //todo
+        game.Host = this.players.filter((val) => {
+            return val.name === game.Players[0];
+        })[0];
+        if (game.Players.length >= 2)
+            game.Host.socket.emit("GameReady");
     }
 }
 
