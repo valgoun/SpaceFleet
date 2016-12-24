@@ -57,7 +57,9 @@ class LobbyClient {
         $("#Leave").click(() => {
             console.log("Leave");
             this.ActualLobby.hide();
-            this.SelectionLobby.show();
+            this.ChoosePanel.show();
+            $("#Lobby p").remove();
+            this.socket.emit("Leave");
             return false;
         });
         $("#Play").click(() => {
@@ -89,6 +91,10 @@ class LobbyClient {
         this.socket.on("PlayerJoined", (name: string) => {
             console.log("caca");
             $("#LobbyTitle").after("<p>" + name + "</p>");
+        });
+        this.socket.on("PlayerLeave", (name: string) => {
+            console.log("Leaver !!!!!");
+            $("#Lobby p:contains('" + name + "')").remove();
         });
 
     }

@@ -37,6 +37,9 @@ var Server = (function () {
         socket.on('Join', function (lobby) {
             _this.OnJoin(socket, lobby);
         });
+        socket.on('Leave', function () {
+            _this.OnLeave(socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -98,6 +101,34 @@ var Server = (function () {
             this.players.splice(this.players.indexOf(p), 1);
             console.log("Fleet " + p.name + " has disconnected");
         }
+    };
+    Server.prototype.OnLeave = function (socket) {
+        console.log("-------------------");
+        console.log("a player leave");
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (!p) {
+            console.error("a non player socket emited a leaving message");
+            return;
+        }
+        var g = this.Games.filter(function (val) {
+            return val.Players.indexOf(p.name) != -1;
+        })[0];
+        if (!g) {
+            console.error("a player try to leave a lobby but he was in no lobby");
+            return;
+        }
+        if (p === g.Host)
+            this.ReHost(g);
+        else {
+            g.Players.splice(g.Players.indexOf(p.name), 1);
+            socket.to(g.Name).broadcast.emit("PlayerLeave", p.name);
+            socket.leave(g.Name);
+        }
+    };
+    //when host of a game disconnect or leave
+    Server.prototype.ReHost = function (game) {
     };
     return Server;
 }());

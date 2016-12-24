@@ -47,6 +47,9 @@ class Server {
         socket.on('Join', (lobby: string) => {
             this.OnJoin(socket, lobby);
         });
+        socket.on('Leave', () => {
+            this.OnLeave(socket);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -112,6 +115,37 @@ class Server {
             this.players.splice(this.players.indexOf(p), 1);
             console.log("Fleet " + p.name + " has disconnected");
         }
+    }
+
+    OnLeave(socket: SocketIO.Socket) {
+        console.log("-------------------");
+        console.log("a player leave");
+        let p = this.players.filter((val) => {
+            return val.socket === socket;
+        })[0];
+        if (!p) {
+            console.error("a non player socket emited a leaving message");
+            return;
+        }
+        let g = this.Games.filter((val) => {
+            return val.Players.indexOf(p.name) != -1;
+        })[0];
+        if (!g) {
+            console.error("a player try to leave a lobby but he was in no lobby");
+            return;
+        }
+        if (p === g.Host)
+            this.ReHost(g);
+        else {
+            g.Players.splice(g.Players.indexOf(p.name), 1);
+            socket.to(g.Name).broadcast.emit("PlayerLeave", p.name);
+            socket.leave(g.Name);
+        }
+    }
+
+    //when host of a game disconnect or leave
+    ReHost(game: Lobby) {
+
     }
 }
 

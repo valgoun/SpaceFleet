@@ -44,7 +44,9 @@ var LobbyClient = (function () {
         $("#Leave").click(function () {
             console.log("Leave");
             _this.ActualLobby.hide();
-            _this.SelectionLobby.show();
+            _this.ChoosePanel.show();
+            $("#Lobby p").remove();
+            _this.socket.emit("Leave");
             return false;
         });
         $("#Play").click(function () {
@@ -75,6 +77,10 @@ var LobbyClient = (function () {
         this.socket.on("PlayerJoined", function (name) {
             console.log("caca");
             $("#LobbyTitle").after("<p>" + name + "</p>");
+        });
+        this.socket.on("PlayerLeave", function (name) {
+            console.log("Leaver !!!!!");
+            $("#Lobby p:contains('" + name + "')").remove();
         });
     };
     return LobbyClient;
