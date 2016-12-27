@@ -93,6 +93,8 @@ var LobbyClient = (function () {
         });
         this.socket.on("LaunchGame", function (players) {
             _this.ActualLobby.hide();
+            console.log("LaunchGame");
+            _this.game = new SimpleGame();
             //LAUNCH THE GAME
             /*
             players is the players list
