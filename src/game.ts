@@ -1,8 +1,8 @@
 ///<reference path="../typings/phaser/phaser.d.ts" />
 
 //Screen Variables
-const screenWidth = 1024;
-const screenHeight = 576;
+const screenWidth = 1280;
+const screenHeight = 720;
 const screenWidthRatio = 1 + ((screenWidth - 1024) / 1024);
 
 //Game Variables
@@ -227,8 +227,8 @@ class SimpleGame {
                 944 * (1 - motherShipsWidthCollider) * 0.5, 447 * (1 - motherShipsHeightCollider) * 0.5);
         }
         else {
-            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider),
-                944 * 0.42, -447 * (1 - motherShipsWidthCollider) * 0.5);
+            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 40,
+                944 * 0.42, -447 * 0.2);
         }
 
         this.motherShips[index].anchor.x = 0.5;
@@ -583,7 +583,7 @@ class SimpleGame {
 
             for (let j = 0; j < this.ships[i].length; j++)
                 if (typeof this.ships[i][j] !== 'undefined' && this.ships[i][j].alive) {
-                    this.game.debug.body(this.ships[i][j]);
+                    //this.game.debug.body(this.ships[i][j]);
                 }
         }
 
