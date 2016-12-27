@@ -76,7 +76,7 @@ class SimpleGame {
     healthTexts: Phaser.Text[];
     respawnTexts: Phaser.Text[][];
 
-    //Groups For Sprite Rendering Sort and Collision Layer    
+    //Groups For Sprite Rendering Sort and Collision Layer
     playerMotherShipGroup: Phaser.Group;
     enemiesMotherShipsGroup: Phaser.Group;
     playerShipsGroup: Phaser.Group;
@@ -107,7 +107,7 @@ class SimpleGame {
 
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-        //Initialize Groups        
+        //Initialize Groups
         this.playerMotherShipGroup = this.game.add.group();
         this.enemiesMotherShipsGroup = this.game.add.group();
         this.playerShipsGroup = this.game.add.group();
@@ -132,7 +132,7 @@ class SimpleGame {
         //Create MotherShip and get MotherShipIndex
         let motherShipIndex: number = this.createMotherShip(playerMotherShip);
 
-        //Created Ships Asked        
+        //Created Ships Asked
         for (let i = 0; i < shipsCount; i++)
             this.createShip(motherShipIndex, i);
 
@@ -216,7 +216,7 @@ class SimpleGame {
         this.motherShips[index] = this.createSprite('MotherShip', motherShipsPosition[index], motherShipWidth, motherShipHeight);
         this.motherShips[index].angle = motherShipsAngles[index];
 
-        //Set Physics Settings        
+        //Set Physics Settings
         this.game.physics.arcade.enable(this.motherShips[index]);
         this.motherShips[index].body.collideWorldBounds = true;
         this.motherShips[index].body.immovable = true;
@@ -234,7 +234,7 @@ class SimpleGame {
         }
 
 
-        //Set Group        
+        //Set Group
         if (playerMotherShip) {
             playerMotherShipIndex = index;
             this.playerMotherShipGroup.add(this.motherShips[index]);
@@ -251,7 +251,7 @@ class SimpleGame {
     createShip(motherShipIndex: number, shipIndex: number) {
         this.ships[motherShipIndex][shipIndex] = this.createSprite('Ship', this.getShipSpawnPosition(motherShipIndex, shipIndex), shipHeight, shipWidth);
 
-        //Set Physics Settings        
+        //Set Physics Settings
         this.game.physics.arcade.enable(this.ships[motherShipIndex][shipIndex]);
         this.ships[motherShipIndex][shipIndex].body.drag.set(shipDrag);
         this.ships[motherShipIndex][shipIndex].body.maxVelocity.set(shipMaxVelocity);
@@ -282,7 +282,7 @@ class SimpleGame {
         }
     }
 
-    //Get Ship Spawn Position From MotherShip    
+    //Get Ship Spawn Position From MotherShip
     getShipSpawnPosition(motherShipIndex: number, shipIndex: number) {
         let point: Phaser.Point = new Phaser.Point();
 
@@ -321,7 +321,7 @@ class SimpleGame {
         return point;
     }
 
-    //General Method to create Sprite    
+    //General Method to create Sprite
     createSprite(name: string, position: { x: number; y: number }, width: number, height: number) {
         let sprite = this.game.add.sprite(position.x, position.y, name);
         sprite.width = width;
@@ -371,7 +371,7 @@ class SimpleGame {
         }.bind(this), 1 * 1000);
     }
 
-    //Movement of 3 players' ships    
+    //Movement of 3 players' ships
     shipsMovement() {
         for (let i = 0; i < this.ships[playerMotherShipIndex].length; i++)
             if (typeof this.ships[playerMotherShipIndex][i] !== 'undefined' && this.ships[playerMotherShipIndex][i].alive) {
@@ -594,5 +594,5 @@ class SimpleGame {
 }
 
 window.onload = () => {
-    var game = new SimpleGame();
+    // var game = new SimpleGame();
 };

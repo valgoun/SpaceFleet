@@ -8,7 +8,7 @@
     },
     "include": [
         "./typing/tsd.d.ts",
-        "./src/*"
-        "./typings/phaser/phaser.d.ts",
+        "./src/*",
+        "./typings/phaser/phaser.d.ts"
     ]
 }

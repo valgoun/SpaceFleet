@@ -71,7 +71,7 @@ var SimpleGame = (function () {
         }
         motherShipsHealth = [];
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        //Initialize Groups        
+        //Initialize Groups
         this.playerMotherShipGroup = this.game.add.group();
         this.enemiesMotherShipsGroup = this.game.add.group();
         this.playerShipsGroup = this.game.add.group();
@@ -92,7 +92,7 @@ var SimpleGame = (function () {
         if (shipsCount === void 0) { shipsCount = 3; }
         //Create MotherShip and get MotherShipIndex
         var motherShipIndex = this.createMotherShip(playerMotherShip);
-        //Created Ships Asked        
+        //Created Ships Asked
         for (var i = 0; i < shipsCount; i++)
             this.createShip(motherShipIndex, i);
         if (playerMotherShip)
@@ -162,7 +162,7 @@ var SimpleGame = (function () {
         motherShipsHealth[index] = 100;
         this.motherShips[index] = this.createSprite('MotherShip', motherShipsPosition[index], motherShipWidth, motherShipHeight);
         this.motherShips[index].angle = motherShipsAngles[index];
-        //Set Physics Settings        
+        //Set Physics Settings
         this.game.physics.arcade.enable(this.motherShips[index]);
         this.motherShips[index].body.collideWorldBounds = true;
         this.motherShips[index].body.immovable = true;
@@ -175,7 +175,7 @@ var SimpleGame = (function () {
         else {
             this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 80, 944 * 0.381, (-447 + 80) * 0.5);
         }
-        //Set Group        
+        //Set Group
         if (playerMotherShip) {
             playerMotherShipIndex = index;
             this.playerMotherShipGroup.add(this.motherShips[index]);
@@ -188,7 +188,7 @@ var SimpleGame = (function () {
     };
     SimpleGame.prototype.createShip = function (motherShipIndex, shipIndex) {
         this.ships[motherShipIndex][shipIndex] = this.createSprite('Ship', this.getShipSpawnPosition(motherShipIndex, shipIndex), shipHeight, shipWidth);
-        //Set Physics Settings        
+        //Set Physics Settings
         this.game.physics.arcade.enable(this.ships[motherShipIndex][shipIndex]);
         this.ships[motherShipIndex][shipIndex].body.drag.set(shipDrag);
         this.ships[motherShipIndex][shipIndex].body.maxVelocity.set(shipMaxVelocity);
@@ -211,7 +211,7 @@ var SimpleGame = (function () {
             this.weaponsBulletsGroup.add(this.weapons[i].bullets);
         }
     };
-    //Get Ship Spawn Position From MotherShip    
+    //Get Ship Spawn Position From MotherShip
     SimpleGame.prototype.getShipSpawnPosition = function (motherShipIndex, shipIndex) {
         var point = new Phaser.Point();
         if (motherShipIndex < 2) {
@@ -244,7 +244,7 @@ var SimpleGame = (function () {
         }
         return point;
     };
-    //General Method to create Sprite    
+    //General Method to create Sprite
     SimpleGame.prototype.createSprite = function (name, position, width, height) {
         var sprite = this.game.add.sprite(position.x, position.y, name);
         sprite.width = width;
@@ -285,7 +285,7 @@ var SimpleGame = (function () {
             }
         }.bind(this), 1 * 1000);
     };
-    //Movement of 3 players' ships    
+    //Movement of 3 players' ships
     SimpleGame.prototype.shipsMovement = function () {
         for (var i = 0; i < this.ships[playerMotherShipIndex].length; i++)
             if (typeof this.ships[playerMotherShipIndex][i] !== 'undefined' && this.ships[playerMotherShipIndex][i].alive) {
@@ -465,6 +465,6 @@ var SimpleGame = (function () {
     return SimpleGame;
 }());
 window.onload = function () {
-    var game = new SimpleGame();
+    // var game = new SimpleGame();
 };
 //# sourceMappingURL=game.js.map

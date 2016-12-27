@@ -12,6 +12,8 @@ class LobbyClient {
 
     //the name of the local player
     LocalName: string;
+    //the Game
+    game: SimpleGame;
 
     constructor() {
         this.socket = io.connect("http://localhost:8080");
@@ -110,6 +112,8 @@ class LobbyClient {
         });
         this.socket.on("LaunchGame", (players: string[]) => {
             this.ActualLobby.hide();
+            console.log("LaunchGame");
+            this.game = new SimpleGame();
             //LAUNCH THE GAME
             /*
             players is the players list
