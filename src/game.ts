@@ -1,5 +1,8 @@
 ///<reference path="../typings/phaser/phaser.d.ts" />
 
+let localPlayerName: string;
+let playersName = [];
+
 //Screen Variables
 const screenWidth = 1024;
 const screenHeight = 576;
@@ -64,7 +67,8 @@ class SimpleGame {
             checkGameOver: this.checkGameOver, startGame: this.startGame, createFleet: this.createFleet,
             createHealthText: this.createHealthText, healthDisplay: this.healthDisplay, respawnDisplay: this.respawnDisplay,
             createRespawnText: this.createRespawnText, createWeapons: this.createWeapons, shipsWeapons: this.shipsWeapons,
-            bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip
+            bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip,
+            setPlayersNames: this.setPlayersNames
         });
     }
 
@@ -114,16 +118,29 @@ class SimpleGame {
         this.enemiesShipsGroup = this.game.add.group();
         this.weaponsBulletsGroup = this.game.add.group();
 
-        //Create Fleets
-        this.createFleet(true, 1);
-        this.createFleet(false);
-        //this.createFleet(false);
-        //this.createFleet(false);
-
         this.startGame();
     }
 
+    setPlayersNames(localName: string, players: string[]) {
+        localPlayerName = localName;
+
+        playersName = [];
+        playersName = players;
+    }
+
     startGame() {
+        //Create Fleets
+        //console.log("Local Name : " + localPlayerName);
+
+        for (let i = 0; i < playersName.length; i++) {
+            //console.log("Players Name : " + playersName[i]);
+
+            if (playersName[i] === localPlayerName)
+                this.createFleet(true);
+            else
+                this.createFleet(false);
+        }
+
         gameStarted = true;
         gameOver = false;
     }
@@ -229,8 +246,8 @@ class SimpleGame {
                 944 * (1 - motherShipsWidthCollider) * 0.5, 447 * (1 - motherShipsHeightCollider) * 0.5);
         }
         else {
-            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 80,
-                944 * 0.381, (-447 + 80) * 0.5);
+            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider),
+                944 * 0.5, -447 * 0.5);
         }
 
 
@@ -517,7 +534,9 @@ class SimpleGame {
         //Respawn Ship After Delay
         setTimeout(function () { this.reviveShip(motherShipIndex, shipIndex); }.bind(this), shipsRespawnDelay * 1000);
 
-        this.respawnDisplay(motherShipIndex, shipIndex);
+
+        if (motherShipIndex === playerMotherShipIndex)
+            this.respawnDisplay(motherShipIndex, shipIndex);
     }
 
     reviveShip(motherShipIndex: number, shipIndex: number) {

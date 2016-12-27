@@ -114,11 +114,8 @@ class LobbyClient {
             this.ActualLobby.hide();
             console.log("LaunchGame");
             this.game = new SimpleGame();
-            //LAUNCH THE GAME
-            /*
-            players is the players list
-            use this and LocalName to get the player id if needed
-            */
+
+            this.game.setPlayersNames(this.LocalName, players);
         });
 
     }

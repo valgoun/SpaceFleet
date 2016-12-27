@@ -95,11 +95,7 @@ var LobbyClient = (function () {
             _this.ActualLobby.hide();
             console.log("LaunchGame");
             _this.game = new SimpleGame();
-            //LAUNCH THE GAME
-            /*
-            players is the players list
-            use this and LocalName to get the player id if needed
-            */
+            _this.game.setPlayersNames(_this.LocalName, players);
         });
     };
     return LobbyClient;

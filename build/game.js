@@ -1,4 +1,6 @@
 ///<reference path="../typings/phaser/phaser.d.ts" />
+var localPlayerName;
+var playersName = [];
 //Screen Variables
 var screenWidth = 1024;
 var screenHeight = 576;
@@ -47,7 +49,8 @@ var SimpleGame = (function () {
             checkGameOver: this.checkGameOver, startGame: this.startGame, createFleet: this.createFleet,
             createHealthText: this.createHealthText, healthDisplay: this.healthDisplay, respawnDisplay: this.respawnDisplay,
             createRespawnText: this.createRespawnText, createWeapons: this.createWeapons, shipsWeapons: this.shipsWeapons,
-            bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip
+            bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip,
+            setPlayersNames: this.setPlayersNames
         });
     }
     SimpleGame.prototype.preload = function () {
@@ -77,14 +80,23 @@ var SimpleGame = (function () {
         this.playerShipsGroup = this.game.add.group();
         this.enemiesShipsGroup = this.game.add.group();
         this.weaponsBulletsGroup = this.game.add.group();
-        //Create Fleets
-        this.createFleet(true, 1);
-        this.createFleet(false);
-        //this.createFleet(false);
-        //this.createFleet(false);
         this.startGame();
     };
+    SimpleGame.prototype.setPlayersNames = function (localName, players) {
+        localPlayerName = localName;
+        playersName = [];
+        playersName = players;
+    };
     SimpleGame.prototype.startGame = function () {
+        //Create Fleets
+        //console.log("Local Name : " + localPlayerName);
+        for (var i = 0; i < playersName.length; i++) {
+            //console.log("Players Name : " + playersName[i]);
+            if (playersName[i] === localPlayerName)
+                this.createFleet(true);
+            else
+                this.createFleet(false);
+        }
         gameStarted = true;
         gameOver = false;
     };
@@ -173,7 +185,7 @@ var SimpleGame = (function () {
             this.motherShips[index].body.setSize(944 * motherShipsWidthCollider, 447 * motherShipsHeightCollider, 944 * (1 - motherShipsWidthCollider) * 0.5, 447 * (1 - motherShipsHeightCollider) * 0.5);
         }
         else {
-            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 80, 944 * 0.381, (-447 + 80) * 0.5);
+            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider), 944 * 0.5, -447 * 0.5);
         }
         //Set Group
         if (playerMotherShip) {
@@ -404,7 +416,8 @@ var SimpleGame = (function () {
         ship.kill();
         //Respawn Ship After Delay
         setTimeout(function () { this.reviveShip(motherShipIndex, shipIndex); }.bind(this), shipsRespawnDelay * 1000);
-        this.respawnDisplay(motherShipIndex, shipIndex);
+        if (motherShipIndex === playerMotherShipIndex)
+            this.respawnDisplay(motherShipIndex, shipIndex);
     };
     SimpleGame.prototype.reviveShip = function (motherShipIndex, shipIndex) {
         if (this.motherShips[motherShipIndex].alive) {
