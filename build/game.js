@@ -80,7 +80,7 @@ var SimpleGame = (function () {
         //Create Fleets
         this.createFleet(true, 1);
         this.createFleet(false);
-        //this.createFleet(false);
+        this.createFleet(false);
         //this.createFleet(false);
         this.startGame();
     };
@@ -166,15 +166,15 @@ var SimpleGame = (function () {
         this.game.physics.arcade.enable(this.motherShips[index]);
         this.motherShips[index].body.collideWorldBounds = true;
         this.motherShips[index].body.immovable = true;
-        this.motherShips[index].anchor.x = 0.5;
-        this.motherShips[index].anchor.y = 0.5;
         //Set Collider Bounds
         if (index < 2) {
             this.motherShips[index].body.setSize(944 * motherShipsWidthCollider, 447 * motherShipsHeightCollider, 944 * (1 - motherShipsWidthCollider) * 0.5, 447 * (1 - motherShipsHeightCollider) * 0.5);
         }
         else {
-            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 80, 944 * 0.381, (-447 + 80) * 0.5);
+            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider), 944 * 0.41, -447 * (1 - motherShipsWidthCollider) * 0.5);
         }
+        this.motherShips[index].anchor.x = 0.5;
+        this.motherShips[index].anchor.y = 0.5;
         //Set Group        
         if (playerMotherShip) {
             playerMotherShipIndex = index;

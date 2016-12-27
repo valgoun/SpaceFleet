@@ -117,7 +117,7 @@ class SimpleGame {
         //Create Fleets
         this.createFleet(true, 1);
         this.createFleet(false);
-        //this.createFleet(false);
+        this.createFleet(false);
         //this.createFleet(false);
 
         this.startGame();
@@ -220,8 +220,6 @@ class SimpleGame {
         this.game.physics.arcade.enable(this.motherShips[index]);
         this.motherShips[index].body.collideWorldBounds = true;
         this.motherShips[index].body.immovable = true;
-        this.motherShips[index].anchor.x = 0.5;
-        this.motherShips[index].anchor.y = 0.5;
 
         //Set Collider Bounds
         if (index < 2) {
@@ -229,9 +227,12 @@ class SimpleGame {
                 944 * (1 - motherShipsWidthCollider) * 0.5, 447 * (1 - motherShipsHeightCollider) * 0.5);
         }
         else {
-            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 80,
-                944 * 0.381, (-447 + 80) * 0.5);
+            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider),
+                944 * 0.42, -447 * (1 - motherShipsWidthCollider) * 0.5);
         }
+
+        this.motherShips[index].anchor.x = 0.5;
+        this.motherShips[index].anchor.y = 0.5;
 
 
         //Set Group        
