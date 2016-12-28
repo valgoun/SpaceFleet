@@ -56,21 +56,7 @@ const motherShipsHeightCollider = 0.3;
 
 class SimpleGame {
 
-    constructor() {
-        //Create Phaser Game With All Functions Needed
-        this.game = new Phaser.Game(screenWidth, screenHeight, Phaser.AUTO, 'content', {
-            preload: this.preload, create: this.create, update: this.update, render: this.render,
-            createSprite: this.createSprite, shipsMovement: this.shipsMovement, createShip: this.createShip,
-            createMotherShip: this.createMotherShip, getShipSpawnPosition: this.getShipSpawnPosition,
-            collisions: this.collisions, destroyShip: this.destroyShip, shipAgainstMotherShip: this.shipAgainstMotherShip,
-            shipAgainstShip: this.shipAgainstShip, reviveShip: this.reviveShip, destroyMotherShip: this.destroyMotherShip,
-            checkGameOver: this.checkGameOver, startGame: this.startGame, createFleet: this.createFleet,
-            createHealthText: this.createHealthText, healthDisplay: this.healthDisplay, respawnDisplay: this.respawnDisplay,
-            createRespawnText: this.createRespawnText, createWeapons: this.createWeapons, shipsWeapons: this.shipsWeapons,
-            bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip,
-            setPlayersNames: this.setPlayersNames
-        });
-    }
+    socket: SocketIOClient.Socket;
 
     game: Phaser.Game;
 
@@ -86,6 +72,24 @@ class SimpleGame {
     playerShipsGroup: Phaser.Group;
     enemiesShipsGroup: Phaser.Group;
     weaponsBulletsGroup: Phaser.Group;
+
+    constructor() {
+        //Create Phaser Game With All Functions Needed
+        this.game = new Phaser.Game(screenWidth, screenHeight, Phaser.AUTO, 'content', {
+            preload: this.preload, create: this.create, update: this.update, render: this.render,
+            createSprite: this.createSprite, shipsMovement: this.shipsMovement, createShip: this.createShip,
+            createMotherShip: this.createMotherShip, getShipSpawnPosition: this.getShipSpawnPosition,
+            collisions: this.collisions, destroyShip: this.destroyShip, shipAgainstMotherShip: this.shipAgainstMotherShip,
+            shipAgainstShip: this.shipAgainstShip, reviveShip: this.reviveShip, destroyMotherShip: this.destroyMotherShip,
+            checkGameOver: this.checkGameOver, startGame: this.startGame, createFleet: this.createFleet,
+            createHealthText: this.createHealthText, healthDisplay: this.healthDisplay, respawnDisplay: this.respawnDisplay,
+            createRespawnText: this.createRespawnText, createWeapons: this.createWeapons, shipsWeapons: this.shipsWeapons,
+            bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip,
+            setPlayersNames: this.setPlayersNames
+        });
+
+        this.socket = io.connect("http://localhost:8080");
+    }
 
     preload() {
         //Load Images For Sprites
