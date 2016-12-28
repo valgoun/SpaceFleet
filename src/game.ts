@@ -250,8 +250,8 @@ class SimpleGame {
                 944 * (1 - motherShipsWidthCollider) * 0.5, 447 * (1 - motherShipsHeightCollider) * 0.5);
         }
         else {
-            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider),
-                944 * 0.5, -447 * 0.5);
+            this.motherShips[index].body.setSize(447 * motherShipsHeightCollider, (944 * motherShipsWidthCollider) - 40,
+                944 * 0.42, -447 * 0.2);
         }
 
 
