@@ -43,6 +43,11 @@ var Server = (function () {
         socket.on('Play', function () {
             _this.OnPlay(socket);
         });
+        //Phaser msg function binding
+        socket.on('moveShip', function (playerName, shipsData) {
+            //this.OnMoveShip(playerName, shipsData, socket);
+            _this.Test();
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -160,6 +165,22 @@ var Server = (function () {
             console.error("a player try to launch a game but he isn't the host");
             return;
         }
+    };
+    Server.prototype.OnMoveShip = function (playerName, shipsData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
+            }
+        }
+    };
+    Server.prototype.Test = function () {
+        console.log("Bite!!!!!!!");
     };
     //when host of a game disconnect or leave
     Server.prototype.ReHost = function (game) {

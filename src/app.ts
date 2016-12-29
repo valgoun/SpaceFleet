@@ -53,6 +53,12 @@ class Server {
         socket.on('Play', () => {
             this.OnPlay(socket);
         });
+
+        //Phaser msg function binding
+        socket.on('moveShip', (playerName: string, shipsData) => {
+            //this.OnMoveShip(playerName, shipsData, socket);
+            this.Test();
+        })
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -177,6 +183,24 @@ class Server {
             console.error("a player try to launch a game but he isn't the host");
             return;
         }
+    }
+
+    OnMoveShip(playerName: string, shipsData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
+            }
+        }
+    }
+
+    Test() {
+        console.log("Bite!!!!!!!");
     }
 
     //when host of a game disconnect or leave

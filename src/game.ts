@@ -74,9 +74,13 @@ class SimpleGame {
     weaponsBulletsGroup: Phaser.Group;
 
     constructor() {
+        console.log("Constructor");
+
+        this.socket = io.connect("http://localhost:8080");
+
         //Create Phaser Game With All Functions Needed
         this.game = new Phaser.Game(screenWidth, screenHeight, Phaser.AUTO, 'content', {
-            preload: this.preload, create: this.create, update: this.update, render: this.render,
+            preload: this.preload, create: this.create, update: this.update.bind(this), render: this.render,
             createSprite: this.createSprite, shipsMovement: this.shipsMovement, createShip: this.createShip,
             createMotherShip: this.createMotherShip, getShipSpawnPosition: this.getShipSpawnPosition,
             collisions: this.collisions, destroyShip: this.destroyShip, shipAgainstMotherShip: this.shipAgainstMotherShip,
@@ -85,10 +89,16 @@ class SimpleGame {
             createHealthText: this.createHealthText, healthDisplay: this.healthDisplay, respawnDisplay: this.respawnDisplay,
             createRespawnText: this.createRespawnText, createWeapons: this.createWeapons, shipsWeapons: this.shipsWeapons,
             bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip,
-            setPlayersNames: this.setPlayersNames
+            setPlayersNames: this.setPlayersNames, setEventHandlers: this.setEventHandlers, onMoveShip: this.onMoveShip
         });
 
-        this.socket = io.connect("http://localhost:8080");
+        this.setEventHandlers();
+    }
+
+    setEventHandlers() {
+        this.socket.on('moveShip', (playerName: string, shipsData) => {
+            this.onMoveShip(playerName, shipsData);
+        });
     }
 
     preload() {
@@ -130,6 +140,14 @@ class SimpleGame {
 
         playersName = [];
         playersName = players;
+
+        let shipsData = []
+
+        console.log("Set Players");
+        console.log(this);
+
+        //Send Ships data
+        //this.socket.emit('moveShip', localPlayerName, shipsData)
     }
 
     startGame() {
@@ -352,17 +370,63 @@ class SimpleGame {
         return sprite;
     }
 
+    test = false;
+
     update() {
         if (gameStarted) {
             this.shipsMovement();
             this.shipsWeapons();
             this.collisions();
+
+            //Stock Ships data
+            let shipsData = []
+
+            for (let i = 0; i < 3; i++) {
+                shipsData[i] =
+                    {
+                        x: this.ships[playerMotherShipIndex][i].x,
+                        y: this.ships[playerMotherShipIndex][i].y,
+                        angle: this.ships[playerMotherShipIndex][i].angle
+                    };
+            }
+
+            //Send Ships data
+            //this.socket.emit('moveShip', localPlayerName, shipsData)
+
+            if (!this.test) {
+                console.log("Update");
+
+                this.test = true;
+                console.log(this);
+            }
         }
 
         this.healthDisplay();
 
         this.game.world.bringToTop(this.enemiesShipsGroup);
         this.game.world.bringToTop(this.playerShipsGroup);
+    }
+
+    //Socket Methods
+    onMoveShip(playerName: string, shipsData) {
+        if (localPlayerName == playerName)
+            return;
+
+        let playerIndex = 0;
+
+        for (let i = 0; i < playersName.length; i++)
+            if (playersName[i] == playerName)
+                playerIndex = i;
+
+        if (!this.motherShips[playerIndex].alive)
+            return;
+
+        for (let i = 0; i < 3; i++) {
+            this.ships[playerIndex][i].x = shipsData[i].x;
+            this.ships[playerIndex][i].y = shipsData[i].y;
+            this.ships[playerIndex][i].angle = shipsData[i].angle;
+        }
+
     }
 
     healthDisplay() {
