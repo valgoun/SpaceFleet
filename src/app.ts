@@ -56,8 +56,7 @@ class Server {
 
         //Phaser msg function binding
         socket.on('moveShip', (playerName: string, shipsData) => {
-            //this.OnMoveShip(playerName, shipsData, socket);
-            this.Test();
+            this.OnMoveShip(playerName, shipsData, socket);
         })
     }
 
@@ -193,14 +192,11 @@ class Server {
             let g = this.Games.filter((val) => {
                 return val.Players.indexOf(p.name) !== -1;
             })[0];
+
             if (g) {
                 socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
             }
         }
-    }
-
-    Test() {
-        console.log("Bite!!!!!!!");
     }
 
     //when host of a game disconnect or leave

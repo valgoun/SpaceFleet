@@ -95,7 +95,7 @@ var LobbyClient = (function () {
             _this.ActualLobby.hide();
             console.log("LaunchGame");
             _this.game = new SimpleGame();
-            _this.game.setPlayersNames(_this.LocalName, players);
+            _this.game.setupGame(_this.socket, _this.LocalName, players);
         });
     };
     return LobbyClient;

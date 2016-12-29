@@ -45,8 +45,7 @@ var Server = (function () {
         });
         //Phaser msg function binding
         socket.on('moveShip', function (playerName, shipsData) {
-            //this.OnMoveShip(playerName, shipsData, socket);
-            _this.Test();
+            _this.OnMoveShip(playerName, shipsData, socket);
         });
     };
     Server.prototype.OnFleetName = function (name, socket) {
@@ -178,9 +177,6 @@ var Server = (function () {
                 socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
             }
         }
-    };
-    Server.prototype.Test = function () {
-        console.log("Bite!!!!!!!");
     };
     //when host of a game disconnect or leave
     Server.prototype.ReHost = function (game) {

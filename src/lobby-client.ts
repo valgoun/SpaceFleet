@@ -113,9 +113,9 @@ class LobbyClient {
         this.socket.on("LaunchGame", (players: string[]) => {
             this.ActualLobby.hide();
             console.log("LaunchGame");
-            this.game = new SimpleGame();
 
-            this.game.setPlayersNames(this.LocalName, players);
+            this.game = new SimpleGame();
+            this.game.setupGame(this.socket, this.LocalName, players);
         });
 
     }

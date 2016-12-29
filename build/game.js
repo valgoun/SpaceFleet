@@ -1,4 +1,5 @@
 ///<reference path="../typings/phaser/phaser.d.ts" />
+var socket;
 var localPlayerName;
 var playersName = [];
 //Screen Variables
@@ -11,7 +12,7 @@ var gameOver = false;
 var playerDead = false;
 var motherShipsHealth = [];
 var shipsRespawnDelay = 3;
-var shipsCrashDamage = 10;
+var shipsCrashDamage = 0;
 var shipsWeaponsDamage = 2;
 //Ships Variables
 var shipWidth = 40 * screenWidthRatio;
@@ -39,12 +40,11 @@ var motherShipsWidthCollider = 0.7;
 var motherShipsHeightCollider = 0.3;
 var SimpleGame = (function () {
     function SimpleGame() {
-        this.test = false;
-        console.log("Constructor");
-        this.socket = io.connect("http://localhost:8080");
+        //console.log("Constructor");
+        // console.log(this);
         //Create Phaser Game With All Functions Needed
         this.game = new Phaser.Game(screenWidth, screenHeight, Phaser.AUTO, 'content', {
-            preload: this.preload, create: this.create, update: this.update.bind(this), render: this.render,
+            preload: this.preload, create: this.create, update: this.update, render: this.render,
             createSprite: this.createSprite, shipsMovement: this.shipsMovement, createShip: this.createShip,
             createMotherShip: this.createMotherShip, getShipSpawnPosition: this.getShipSpawnPosition,
             collisions: this.collisions, destroyShip: this.destroyShip, shipAgainstMotherShip: this.shipAgainstMotherShip,
@@ -53,23 +53,27 @@ var SimpleGame = (function () {
             createHealthText: this.createHealthText, healthDisplay: this.healthDisplay, respawnDisplay: this.respawnDisplay,
             createRespawnText: this.createRespawnText, createWeapons: this.createWeapons, shipsWeapons: this.shipsWeapons,
             bulletAgainstShip: this.bulletAgainstShip, bulletAgainstMotherShip: this.bulletAgainstMotherShip,
-            setPlayersNames: this.setPlayersNames, setEventHandlers: this.setEventHandlers, onMoveShip: this.onMoveShip
+            setEventHandlers: this.setEventHandlers, onMoveShip: this.onMoveShip, setupGame: this.setupGame
         });
-        this.setEventHandlers();
     }
-    SimpleGame.prototype.setEventHandlers = function () {
-        var _this = this;
-        this.socket.on('moveShip', function (playerName, shipsData) {
-            _this.onMoveShip(playerName, shipsData);
-        });
-    };
     SimpleGame.prototype.preload = function () {
         //Load Images For Sprites
         this.game.load.image('Ship', 'src/assets/Ship.png');
         this.game.load.image('MotherShip', 'src/assets/MotherShip.png');
         this.game.load.image('Bullet', 'src/assets/Bullet.png');
     };
+    SimpleGame.prototype.setupGame = function (so, localName, players) {
+        socket = so;
+        localPlayerName = localName;
+        playersName = [];
+        playersName = players;
+        // console.log("SetupGame");
+        // console.log(this);
+    };
     SimpleGame.prototype.create = function () {
+        // console.log("Create");
+        // console.log(this);
+        this.setEventHandlers();
         //Initialize Arrays
         this.ships = [];
         for (var i = 0; i < 4; i++) {
@@ -84,6 +88,7 @@ var SimpleGame = (function () {
         }
         motherShipsHealth = [];
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        this.game.stage.disableVisibilityChange = true;
         //Initialize Groups
         this.playerMotherShipGroup = this.game.add.group();
         this.enemiesMotherShipsGroup = this.game.add.group();
@@ -92,15 +97,11 @@ var SimpleGame = (function () {
         this.weaponsBulletsGroup = this.game.add.group();
         this.startGame();
     };
-    SimpleGame.prototype.setPlayersNames = function (localName, players) {
-        localPlayerName = localName;
-        playersName = [];
-        playersName = players;
-        var shipsData = [];
-        console.log("Set Players");
-        console.log(this);
-        //Send Ships data
-        //this.socket.emit('moveShip', localPlayerName, shipsData)
+    SimpleGame.prototype.setEventHandlers = function () {
+        var _this = this;
+        socket.on("moveShip", function (playerName, shipsData) {
+            _this.onMoveShip(playerName, shipsData);
+        });
     };
     SimpleGame.prototype.startGame = function () {
         //Create Fleets
@@ -287,20 +288,16 @@ var SimpleGame = (function () {
             //Stock Ships data
             var shipsData = [];
             for (var i = 0; i < 3; i++) {
-                shipsData[i] =
-                    {
-                        x: this.ships[playerMotherShipIndex][i].x,
-                        y: this.ships[playerMotherShipIndex][i].y,
-                        angle: this.ships[playerMotherShipIndex][i].angle
-                    };
+                if (typeof this.ships[playerMotherShipIndex][i] !== 'undefined')
+                    shipsData[i] =
+                        {
+                            x: this.ships[playerMotherShipIndex][i].x,
+                            y: this.ships[playerMotherShipIndex][i].y,
+                            angle: this.ships[playerMotherShipIndex][i].angle
+                        };
             }
             //Send Ships data
-            //this.socket.emit('moveShip', localPlayerName, shipsData)
-            if (!this.test) {
-                console.log("Update");
-                this.test = true;
-                console.log(this);
-            }
+            socket.emit("moveShip", localPlayerName, shipsData);
         }
         this.healthDisplay();
         this.game.world.bringToTop(this.enemiesShipsGroup);
@@ -308,6 +305,7 @@ var SimpleGame = (function () {
     };
     //Socket Methods
     SimpleGame.prototype.onMoveShip = function (playerName, shipsData) {
+        //console.log("Data Received !");
         if (localPlayerName == playerName)
             return;
         var playerIndex = 0;
@@ -316,11 +314,12 @@ var SimpleGame = (function () {
                 playerIndex = i;
         if (!this.motherShips[playerIndex].alive)
             return;
-        for (var i = 0; i < 3; i++) {
-            this.ships[playerIndex][i].x = shipsData[i].x;
-            this.ships[playerIndex][i].y = shipsData[i].y;
-            this.ships[playerIndex][i].angle = shipsData[i].angle;
-        }
+        for (var i = 0; i < 3; i++)
+            if (typeof this.ships[playerMotherShipIndex][i] !== 'undefined') {
+                this.ships[playerIndex][i].x = shipsData[i].x;
+                this.ships[playerIndex][i].y = shipsData[i].y;
+                this.ships[playerIndex][i].angle = shipsData[i].angle;
+            }
     };
     SimpleGame.prototype.healthDisplay = function () {
         for (var i = 0; i < this.healthTexts.length; i++)
@@ -410,14 +409,14 @@ var SimpleGame = (function () {
     };
     SimpleGame.prototype.collisions = function () {
         //Players Ships Collision
-        this.game.physics.arcade.overlap(this.playerShipsGroup, this.enemiesShipsGroup, this.shipAgainstShip.bind(this));
-        this.game.physics.arcade.overlap(this.playerShipsGroup, this.enemiesMotherShipsGroup, this.shipAgainstMotherShip.bind(this));
+        this.game.physics.arcade.collide(this.playerShipsGroup, this.enemiesShipsGroup, this.shipAgainstShip.bind(this), null, this);
+        this.game.physics.arcade.collide(this.playerShipsGroup, this.enemiesMotherShipsGroup, this.shipAgainstMotherShip.bind(this), null, this);
         //Enemies Ships Collisions
-        this.game.physics.arcade.overlap(this.enemiesShipsGroup, this.playerMotherShipGroup, this.shipAgainstMotherShip.bind(this));
+        this.game.physics.arcade.collide(this.enemiesShipsGroup, this.playerMotherShipGroup, this.shipAgainstMotherShip.bind(this), null, this);
         //Weapons Bullets Collisions
-        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.enemiesShipsGroup, this.bulletAgainstShip.bind(this));
-        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.enemiesMotherShipsGroup, this.bulletAgainstMotherShip.bind(this));
-        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerMotherShipGroup, this.bulletAgainstMotherShip.bind(this));
+        this.game.physics.arcade.collide(this.weaponsBulletsGroup, this.enemiesShipsGroup, this.bulletAgainstShip.bind(this), null, this);
+        this.game.physics.arcade.collide(this.weaponsBulletsGroup, this.enemiesMotherShipsGroup, this.bulletAgainstMotherShip.bind(this), null, this);
+        this.game.physics.arcade.collide(this.weaponsBulletsGroup, this.playerMotherShipGroup, this.bulletAgainstMotherShip.bind(this), null, this);
     };
     SimpleGame.prototype.shipAgainstMotherShip = function (ship, motherShip) {
         this.destroyShip(ship);
@@ -445,6 +444,7 @@ var SimpleGame = (function () {
         this.destroyShip(ship2);
     };
     SimpleGame.prototype.destroyShip = function (ship) {
+        ship.kill();
         var motherShipIndex = 0;
         var shipIndex = 0;
         for (var i = 0; i < this.ships.length; i++) {
@@ -458,10 +458,10 @@ var SimpleGame = (function () {
             }
         }
         //Reset Ship
-        this.ships[motherShipIndex][shipIndex].position = this.getShipSpawnPosition(motherShipIndex, shipIndex);
-        this.ships[motherShipIndex][shipIndex].angle = this.motherShips[motherShipIndex].angle - 90;
-        this.ships[motherShipIndex][shipIndex].body.velocity = { x: 0, y: 0 };
-        ship.kill();
+        if (motherShipIndex === playerMotherShipIndex) {
+            this.ships[motherShipIndex][shipIndex].position = this.getShipSpawnPosition(motherShipIndex, shipIndex);
+            this.ships[motherShipIndex][shipIndex].angle = this.motherShips[motherShipIndex].angle - 90;
+        }
         //Respawn Ship After Delay
         setTimeout(function () { this.reviveShip(motherShipIndex, shipIndex); }.bind(this), shipsRespawnDelay * 1000);
         if (motherShipIndex === playerMotherShipIndex)
@@ -469,7 +469,9 @@ var SimpleGame = (function () {
     };
     SimpleGame.prototype.reviveShip = function (motherShipIndex, shipIndex) {
         if (this.motherShips[motherShipIndex].alive) {
-            this.ships[motherShipIndex][shipIndex].revive();
+            //Reset Ship
+            var position = this.getShipSpawnPosition(motherShipIndex, shipIndex);
+            this.ships[motherShipIndex][shipIndex].reset(position.x, position.y);
         }
     };
     SimpleGame.prototype.bulletAgainstShip = function (bullet, ship) {
