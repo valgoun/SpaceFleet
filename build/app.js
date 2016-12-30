@@ -47,6 +47,12 @@ var Server = (function () {
         socket.on('moveShip', function (playerName, shipsData) {
             _this.OnMoveShip(playerName, shipsData, socket);
         });
+        socket.on('damage', function (playerName, motherShipData) {
+            _this.OnDamage(playerName, motherShipData, socket);
+        });
+        socket.on('shoot', function (playerName, shootData) {
+            _this.OnShoot(playerName, shootData, socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -165,6 +171,7 @@ var Server = (function () {
             return;
         }
     };
+    //Phaser functions
     Server.prototype.OnMoveShip = function (playerName, shipsData, socket) {
         var p = this.players.filter(function (val) {
             return val.socket === socket;
@@ -175,6 +182,32 @@ var Server = (function () {
             })[0];
             if (g) {
                 socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
+            }
+        }
+    };
+    Server.prototype.OnDamage = function (playerName, motherShipData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("damage", playerName, motherShipData);
+            }
+        }
+    };
+    Server.prototype.OnShoot = function (playerName, shootData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("shoot", playerName, shootData);
             }
         }
     };

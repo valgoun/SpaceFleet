@@ -57,7 +57,15 @@ class Server {
         //Phaser msg function binding
         socket.on('moveShip', (playerName: string, shipsData) => {
             this.OnMoveShip(playerName, shipsData, socket);
-        })
+        });
+
+        socket.on('damage', (playerName: string, motherShipData) => {
+            this.OnDamage(playerName, motherShipData, socket);
+        });
+
+        socket.on('shoot', (playerName: string, shootData) => {
+            this.OnShoot(playerName, shootData, socket);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -184,6 +192,7 @@ class Server {
         }
     }
 
+    //Phaser functions
     OnMoveShip(playerName: string, shipsData, socket: SocketIO.Socket) {
         let p = this.players.filter((val) => {
             return val.socket === socket
@@ -195,6 +204,36 @@ class Server {
 
             if (g) {
                 socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
+            }
+        }
+    }
+
+    OnDamage(playerName: string, motherShipData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+
+            if (g) {
+                socket.to(g.Name).broadcast.emit("damage", playerName, motherShipData);
+            }
+        }
+    }
+
+    OnShoot(playerName: string, shootData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+
+            if (g) {
+                socket.to(g.Name).broadcast.emit("shoot", playerName, shootData);
             }
         }
     }
