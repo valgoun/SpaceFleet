@@ -13,7 +13,8 @@ class LobbyClient {
     //the name of the local player
     LocalName: string;
     //the Game
-    game: SimpleGame;
+    //game: OldGame.SimpleGame;
+    game: SpaceFleet;
 
     constructor() {
         this.socket = io.connect("http://localhost:8080");
@@ -114,11 +115,19 @@ class LobbyClient {
             this.ActualLobby.hide();
             console.log("LaunchGame");
 
-            this.game = new SimpleGame();
-            this.game.setupGame(this.socket, this.LocalName, players);
+            this.game = new SpaceFleet(this.socket, this.LocalName, players);
+            //this.game = new OldGame.SimpleGame();
+            //this.game.setupGame(this.socket, this.LocalName, players);
         });
 
     }
 }
+
+
+window.onload = () => {
+
+    var game = new SpaceFleet(this.socket, "Player1", ["Player1", "Player2", "Player3", "Player4"]);
+
+};
 
 let lb = new LobbyClient();
