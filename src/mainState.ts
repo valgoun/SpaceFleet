@@ -3,6 +3,10 @@ class MainState extends Phaser.State {
     //Singleton instance    
     static instance: MainState;
 
+    //Global Variables
+    public gameOver: boolean = false;
+    public localPlayerDead: boolean = false;
+
     //Sockets Settings
     public socket: SocketIOClient.Socket;
     public localPlayerName: string;
@@ -61,29 +65,28 @@ class MainState extends Phaser.State {
         this.game.stage.disableVisibilityChange = true;
 
         //Initialize Groups
-        this.playerMotherShipGroup = this.game.add.group();
-        this.enemiesMotherShipsGroup = this.game.add.group();
-        this.playerShipsGroup = this.game.add.group();
-        this.enemiesShipsGroup = this.game.add.group();
-        this.weaponsBulletsGroup = this.game.add.group();
-        this.enemiesWeaponsBulletsGroup = this.game.add.group();
+        this.playerMotherShipGroup = this.game.add.physicsGroup();
+        this.enemiesMotherShipsGroup = this.game.add.physicsGroup();
+        this.playerShipsGroup = this.game.add.physicsGroup();
+        this.enemiesShipsGroup = this.game.add.physicsGroup();
+        this.weaponsBulletsGroup = this.game.add.physicsGroup();
+        this.enemiesWeaponsBulletsGroup = this.game.add.physicsGroup();
 
         this.startGame();
     }
 
     //Setup Listeners  
     setEventHandlers() {
-        /*socket.on("moveShip", (playerName: string, shipsData) => {
-            this.onMoveShip(playerName, shipsData);
+        //Socket Listener
+        MainState.instance.socket.on("moveShip", (playerName, shipData) => {
+            if (this.localPlayerName !== playerName)
+                this.motherShips[shipData.motherShipIndex].ships[shipData.shipIndex].onMoveShip(shipData);
         });
 
-        socket.on("damage", (playerName: string, motherShipData) => {
-            this.onDamage(playerName, motherShipData);
+        MainState.instance.socket.on("shoot", (playerName, shootData) => {
+            if (this.localPlayerName !== playerName)
+                this.motherShips[shootData.motherShipIndex].ships[shootData.shipIndex].onShoot(shootData);
         });
-
-        socket.on("shoot", (playerName: string, shootData) => {
-            this.onShoot(playerName, shootData);
-        });*/
     }
 
     startGame() {
@@ -98,7 +101,7 @@ class MainState extends Phaser.State {
         }
     }
 
-    createFleet(playerMotherShip: boolean, shipsCount: number = 3) {
+    createFleet(playerMotherShip: boolean, shipsCount: number = 1) {
         let index = 0;
 
         //Check Which Slot is Free
@@ -108,10 +111,74 @@ class MainState extends Phaser.State {
                 break;
             }
 
-        this.motherShips[index] = new MotherShip(this.game, 'PlayerTest', playerMotherShip, index, 'MotherShip');
+        this.motherShips[index] = new MotherShip(this.game, this.localPlayerName, playerMotherShip, index, 'MotherShip');
+
+        //Set Group
+        if (playerMotherShip)
+            this.playerMotherShipGroup.add(this.motherShips[index]);
+        else
+            this.enemiesMotherShipsGroup.add(this.motherShips[index]);
 
         //Created Ships Asked
-        for (let i = 0; i < shipsCount; i++)
+        for (let i = 0; i < shipsCount; i++) {
             this.motherShips[index].ships[i] = new Ship(this.game, playerMotherShip, this.motherShips[index], i, 'Ship');
+
+            //Set Group
+            if (playerMotherShip) {
+                this.playerShipsGroup.add(this.motherShips[index].ships[i]);
+                this.weaponsBulletsGroup.add(this.motherShips[index].ships[i].weapon.bullets);
+            }
+            else {
+                this.enemiesShipsGroup.add(this.motherShips[index].ships[i]);
+                this.enemiesWeaponsBulletsGroup.add(this.motherShips[index].ships[i].weapon.bullets);
+            }
+        }
+    }
+
+    checkGameOver() {
+        let aliveMotherShips = 0;
+        let winnerMotherShipIndex = 0;
+        let winnerName;
+
+        for (let i = 0; i < this.motherShips.length; i++)
+            if (this.motherShips[i].alive) {
+                aliveMotherShips++;
+                winnerMotherShipIndex = i;
+                winnerName = this.motherShips[i].playerName;
+            }
+
+        //Game Over
+        if (aliveMotherShips < 2) {
+            this.gameOver = true;
+
+            console.log("Game Over !!");
+            console.log(winnerName + " won !!");
+
+            for (let i = 0; i < this.motherShips.length; i++) {
+                if (i !== winnerMotherShipIndex) {
+                    for (let j = 0; j < 3; j++)
+                        if (this.motherShips[i].ships[j].alive)
+                            this.motherShips[i].ships[j].kill();
+                }
+            }
+        }
+    }
+
+    render() {
+        //Debug Colliders
+        for (let i = 0; i < this.motherShips.length; i++) {
+            if (typeof this.motherShips[i] !== 'undefined' && this.motherShips[i].alive)
+                this.game.debug.body(this.motherShips[i]);
+
+            for (let j = 0; j < this.motherShips[i].ships.length; j++)
+                if (typeof this.motherShips[i].ships[j] !== 'undefined' && this.motherShips[i].ships[j].alive) {
+                    this.game.debug.body(this.motherShips[i].ships[j]);
+                }
+        }
+
+        for (let i = 0; i < this.healthTexts.length; i++)
+            if (typeof this.healthTexts[i] !== 'undefined') {
+                //this.game.debug.geom(this.healthTexts[i].textBounds);
+            }
     }
 }

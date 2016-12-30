@@ -1,5 +1,4 @@
 // import { Lobby } from "./lobby"
-var _this = this;
 var LobbyClient = (function () {
     function LobbyClient() {
         this.socket = io.connect("http://localhost:8080");
@@ -103,7 +102,7 @@ var LobbyClient = (function () {
     return LobbyClient;
 }());
 window.onload = function () {
-    var game = new SpaceFleet(_this.socket, "Player1", ["Player1", "Player2", "Player3", "Player4"]);
+    //var game = new SpaceFleet(this.socket, "Player1", ["Player1", "Player2", "Player3", "Player4"]);
 };
 var lb = new LobbyClient();
 //# sourceMappingURL=lobby-client.js.map

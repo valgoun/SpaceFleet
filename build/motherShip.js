@@ -29,7 +29,12 @@ var MotherShip = (function (_super) {
         _this.width = _this.motherShipWidth;
         _this.height = _this.motherShipHeight;
         _this.setupMotherShip(playerMotherShip);
+        _this.createHealthText();
         game.add.existing(_this);
+        //Socket Listener
+        MainState.instance.socket.on("damage", function (motherShipData) {
+            _this.onDamage(motherShipData);
+        });
         return _this;
     }
     MotherShip.prototype.setupMotherShip = function (playerMotherShip) {
@@ -46,14 +51,62 @@ var MotherShip = (function (_super) {
         else {
             this.body.setSize(447 * this.motherShipsHeightCollider, (944 * this.motherShipsWidthCollider) - 40, 944 * 0.42, -447 * 0.2);
         }
-        //Set Group
-        if (playerMotherShip) {
-            MainState.instance.playerMotherShipGroup.add(this);
+    };
+    MotherShip.prototype.createHealthText = function () {
+        var x = this.position.x;
+        var y = this.position.y;
+        switch (this.motherShipIndex) {
+            case 0:
+                x += 80 * screenWidthRatio;
+                y += 50 * screenWidthRatio;
+                break;
+            case 1:
+                x -= 80 * screenWidthRatio;
+                y -= 50 * screenWidthRatio;
+                break;
+            case 2:
+                x -= 60 * screenWidthRatio;
+                y += 80 * screenWidthRatio;
+                break;
+            case 3:
+                x += 60 * screenWidthRatio;
+                y -= 80 * screenWidthRatio;
+                break;
         }
-        else
-            MainState.instance.enemiesMotherShipsGroup.add(this);
-        //this.createHealthText(index);
-        //this.createRespawnText(index);
+        var style = { font: "bold 12px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+        this.healthText = this.game.add.text(x, y, "Health : 100", style);
+        this.healthText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.healthText.anchor.x = 0.5;
+        this.healthText.anchor.y = 0.5;
+    };
+    MotherShip.prototype.damageMotherShip = function (damage) {
+        this.health -= damage;
+        this.healthText.text = "Health : " + this.health.toString();
+        this.healthText.bringToTop();
+        //Send Damage Data                
+        var motherShipData = { index: this.motherShipIndex, health: this.health };
+        MainState.instance.socket.emit("damage", motherShipData);
+        this.checkDeath();
+    };
+    //Socket function    
+    MotherShip.prototype.onDamage = function (motherShipData) {
+        if (motherShipData.index === this.motherShipIndex) {
+            this.health = motherShipData.health;
+            this.healthText.text = "Health : " + this.health.toString();
+            this.healthText.bringToTop();
+            this.checkDeath();
+        }
+    };
+    MotherShip.prototype.checkDeath = function () {
+        if (this.health <= 0) {
+            if (this.playerMotherShip) {
+                console.log("Local Player's Dead !!");
+            }
+            this.kill();
+            MainState.instance.checkGameOver();
+            this.healthText.text = "Dead !";
+            setTimeout(function () { this.healthText.destroy(); }.bind(this), 2 * 1000);
+        }
     };
     return MotherShip;
 }(Phaser.Sprite));

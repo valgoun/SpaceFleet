@@ -414,7 +414,7 @@ namespace OldGame {
                 }
 
                 //Send Ships data
-                socket.emit("moveShip", localPlayerName, shipsData)
+                socket.emit("moveShip", localPlayerName, shipsData);
             }
 
             this.healthDisplay();

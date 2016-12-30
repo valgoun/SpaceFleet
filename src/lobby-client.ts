@@ -126,7 +126,7 @@ class LobbyClient {
 
 window.onload = () => {
 
-    var game = new SpaceFleet(this.socket, "Player1", ["Player1", "Player2", "Player3", "Player4"]);
+    //var game = new SpaceFleet(this.socket, "Player1", ["Player1", "Player2", "Player3", "Player4"]);
 
 };
 
