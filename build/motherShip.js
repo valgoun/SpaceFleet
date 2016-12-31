@@ -30,11 +30,8 @@ var MotherShip = (function (_super) {
         _this.height = _this.motherShipHeight;
         _this.setupMotherShip(playerMotherShip);
         _this.createHealthText();
+        _this.setEventHandlers();
         game.add.existing(_this);
-        //Socket Listener
-        MainState.instance.socket.on("damage", function (motherShipData) {
-            _this.onDamage(motherShipData);
-        });
         return _this;
     }
     MotherShip.prototype.setupMotherShip = function (playerMotherShip) {
@@ -79,6 +76,52 @@ var MotherShip = (function (_super) {
         this.healthText.anchor.x = 0.5;
         this.healthText.anchor.y = 0.5;
     };
+    MotherShip.prototype.setEventHandlers = function () {
+        var _this = this;
+        //Socket Listener
+        MainState.instance.socket.on("damage", function (motherShipData) {
+            _this.onDamage(motherShipData);
+        });
+        MainState.instance.socket.on("moveShip", function (index, shipsData) {
+            _this.onMoveShip(index, shipsData);
+        });
+        MainState.instance.socket.on("shoot", function (shootData) {
+            if (shootData.motherShipIndex === _this.motherShipIndex)
+                _this.ships[shootData.shipIndex].onShoot();
+        });
+        MainState.instance.socket.on("death", function (deathData) {
+            if (deathData.motherShipIndex === _this.motherShipIndex)
+                _this.ships[deathData.shipIndex].onDeath();
+        });
+    };
+    MotherShip.prototype.update = function () {
+        if (this.playerMotherShip && MainState.instance.gameStarted)
+            this.sendMoveShip();
+    };
+    //Socket function    
+    MotherShip.prototype.sendMoveShip = function () {
+        //Send Ships data
+        var shipsData = [];
+        for (var i = 0; i < 3; i++) {
+            if (typeof this.ships[i] !== 'undefined')
+                shipsData[i] =
+                    {
+                        x: this.ships[i].x,
+                        y: this.ships[i].y,
+                        angle: this.ships[i].angle
+                    };
+        }
+        MainState.instance.socket.emit("moveShip", this.motherShipIndex, shipsData);
+    };
+    MotherShip.prototype.onMoveShip = function (index, shipsData) {
+        if (index === this.motherShipIndex)
+            for (var i = 0; i < 3; i++)
+                if (typeof this.ships[i] !== 'undefined') {
+                    this.ships[i].x = shipsData[i].x;
+                    this.ships[i].y = shipsData[i].y;
+                    this.ships[i].angle = shipsData[i].angle;
+                }
+    };
     MotherShip.prototype.damageMotherShip = function (damage) {
         this.health -= damage;
         this.healthText.text = "Health : " + this.health.toString();
@@ -88,7 +131,6 @@ var MotherShip = (function (_super) {
         MainState.instance.socket.emit("damage", motherShipData);
         this.checkDeath();
     };
-    //Socket function    
     MotherShip.prototype.onDamage = function (motherShipData) {
         if (motherShipData.index === this.motherShipIndex) {
             this.health = motherShipData.health;

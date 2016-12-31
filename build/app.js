@@ -44,14 +44,20 @@ var Server = (function () {
             _this.OnPlay(socket);
         });
         //Phaser msg function binding
-        socket.on('moveShip', function (playerName, shipsData) {
-            _this.OnMoveShip(playerName, shipsData, socket);
+        socket.on('ready', function (playerName) {
+            _this.OnReady(playerName, socket);
         });
-        socket.on('damage', function (playerName, motherShipData) {
-            _this.OnDamage(playerName, motherShipData, socket);
+        socket.on('moveShip', function (index, shipsData) {
+            _this.OnMoveShip(index, shipsData, socket);
         });
-        socket.on('shoot', function (playerName, shootData) {
-            _this.OnShoot(playerName, shootData, socket);
+        socket.on('damage', function (motherShipData) {
+            _this.OnDamage(motherShipData, socket);
+        });
+        socket.on('shoot', function (shootData) {
+            _this.OnShoot(shootData, socket);
+        });
+        socket.on('death', function (deathData) {
+            _this.OnDeath(deathData, socket);
         });
     };
     Server.prototype.OnFleetName = function (name, socket) {
@@ -172,7 +178,7 @@ var Server = (function () {
         }
     };
     //Phaser functions
-    Server.prototype.OnMoveShip = function (playerName, shipsData, socket) {
+    Server.prototype.OnReady = function (playerName, socket) {
         var p = this.players.filter(function (val) {
             return val.socket === socket;
         })[0];
@@ -181,11 +187,11 @@ var Server = (function () {
                 return val.Players.indexOf(p.name) !== -1;
             })[0];
             if (g) {
-                socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
+                this.sio.in(g.Name).emit("ready", playerName);
             }
         }
     };
-    Server.prototype.OnDamage = function (playerName, motherShipData, socket) {
+    Server.prototype.OnMoveShip = function (index, shipsData, socket) {
         var p = this.players.filter(function (val) {
             return val.socket === socket;
         })[0];
@@ -194,11 +200,11 @@ var Server = (function () {
                 return val.Players.indexOf(p.name) !== -1;
             })[0];
             if (g) {
-                socket.to(g.Name).broadcast.emit("damage", playerName, motherShipData);
+                socket.to(g.Name).broadcast.emit("moveShip", index, shipsData);
             }
         }
     };
-    Server.prototype.OnShoot = function (playerName, shootData, socket) {
+    Server.prototype.OnDamage = function (motherShipData, socket) {
         var p = this.players.filter(function (val) {
             return val.socket === socket;
         })[0];
@@ -207,7 +213,33 @@ var Server = (function () {
                 return val.Players.indexOf(p.name) !== -1;
             })[0];
             if (g) {
-                socket.to(g.Name).broadcast.emit("shoot", playerName, shootData);
+                socket.to(g.Name).broadcast.emit("damage", motherShipData);
+            }
+        }
+    };
+    Server.prototype.OnShoot = function (shootData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                this.sio.in(g.Name).emit("shoot", shootData);
+            }
+        }
+    };
+    Server.prototype.OnDeath = function (deathData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("death", deathData);
             }
         }
     };

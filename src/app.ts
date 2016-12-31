@@ -55,16 +55,24 @@ class Server {
         });
 
         //Phaser msg function binding
-        socket.on('moveShip', (playerName: string, shipsData) => {
-            this.OnMoveShip(playerName, shipsData, socket);
+        socket.on('ready', (playerName) => {
+            this.OnReady(playerName, socket);
         });
 
-        socket.on('damage', (playerName: string, motherShipData) => {
-            this.OnDamage(playerName, motherShipData, socket);
+        socket.on('moveShip', (index, shipsData) => {
+            this.OnMoveShip(index, shipsData, socket);
         });
 
-        socket.on('shoot', (playerName: string, shootData) => {
-            this.OnShoot(playerName, shootData, socket);
+        socket.on('damage', (motherShipData) => {
+            this.OnDamage(motherShipData, socket);
+        });
+
+        socket.on('shoot', (shootData) => {
+            this.OnShoot(shootData, socket);
+        });
+
+        socket.on('death', (deathData) => {
+            this.OnDeath(deathData, socket);
         });
     }
 
@@ -193,7 +201,7 @@ class Server {
     }
 
     //Phaser functions
-    OnMoveShip(playerName: string, shipsData, socket: SocketIO.Socket) {
+    OnReady(playerName, socket: SocketIO.Socket) {
         let p = this.players.filter((val) => {
             return val.socket === socket
         })[0];
@@ -203,12 +211,12 @@ class Server {
             })[0];
 
             if (g) {
-                socket.to(g.Name).broadcast.emit("moveShip", playerName, shipsData);
+                this.sio.in(g.Name).emit("ready", playerName);
             }
         }
     }
 
-    OnDamage(playerName: string, motherShipData, socket: SocketIO.Socket) {
+    OnMoveShip(index, shipsData, socket: SocketIO.Socket) {
         let p = this.players.filter((val) => {
             return val.socket === socket
         })[0];
@@ -218,12 +226,12 @@ class Server {
             })[0];
 
             if (g) {
-                socket.to(g.Name).broadcast.emit("damage", playerName, motherShipData);
+                socket.to(g.Name).broadcast.emit("moveShip", index, shipsData);
             }
         }
     }
 
-    OnShoot(playerName: string, shootData, socket: SocketIO.Socket) {
+    OnDamage(motherShipData, socket: SocketIO.Socket) {
         let p = this.players.filter((val) => {
             return val.socket === socket
         })[0];
@@ -233,7 +241,39 @@ class Server {
             })[0];
 
             if (g) {
-                socket.to(g.Name).broadcast.emit("shoot", playerName, shootData);
+                socket.to(g.Name).broadcast.emit("damage", motherShipData);
+            }
+        }
+    }
+
+    OnShoot(shootData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+
+            if (g) {
+                this.sio.in(g.Name).emit("shoot", shootData);
+                //socket.to(g.Name).broadcast.emit("shoot", shootData);
+                //socket.emit("shoot", shootData);
+            }
+        }
+    }
+
+    OnDeath(deathData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+
+            if (g) {
+                socket.to(g.Name).broadcast.emit("death", deathData);
             }
         }
     }

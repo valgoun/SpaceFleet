@@ -47,13 +47,9 @@ class MotherShip extends Phaser.Sprite {
 
         this.setupMotherShip(playerMotherShip);
         this.createHealthText();
+        this.setEventHandlers();
 
         game.add.existing(this);
-
-        //Socket Listener
-        MainState.instance.socket.on("damage", (motherShipData) => {
-            this.onDamage(motherShipData);
-        });
     }
 
     setupMotherShip(playerMotherShip: boolean) {
@@ -107,6 +103,62 @@ class MotherShip extends Phaser.Sprite {
         this.healthText.anchor.y = 0.5;
     }
 
+    setEventHandlers() {
+        //Socket Listener
+        MainState.instance.socket.on("damage", (motherShipData) => {
+            this.onDamage(motherShipData);
+        });
+
+        MainState.instance.socket.on("moveShip", (index, shipsData) => {
+            this.onMoveShip(index, shipsData);
+        });
+
+        MainState.instance.socket.on("shoot", (shootData) => {
+            if (shootData.motherShipIndex === this.motherShipIndex)
+                this.ships[shootData.shipIndex].onShoot();
+        });
+
+        MainState.instance.socket.on("death", (deathData) => {
+            if (deathData.motherShipIndex === this.motherShipIndex)
+                this.ships[deathData.shipIndex].onDeath();
+        });
+    }
+
+    update() {
+
+        if (this.playerMotherShip && MainState.instance.gameStarted)
+            this.sendMoveShip();
+    }
+
+    //Socket function    
+    sendMoveShip() {
+        //Send Ships data
+        let shipsData = [];
+
+        for (let i = 0; i < 3; i++) {
+            if (typeof this.ships[i] !== 'undefined')
+                shipsData[i] =
+                    {
+                        x: this.ships[i].x,
+                        y: this.ships[i].y,
+                        angle: this.ships[i].angle
+                    };
+        }
+
+        MainState.instance.socket.emit("moveShip", this.motherShipIndex, shipsData);
+    }
+
+    onMoveShip(index, shipsData) {
+
+        if (index === this.motherShipIndex)
+            for (let i = 0; i < 3; i++)
+                if (typeof this.ships[i] !== 'undefined') {
+                    this.ships[i].x = shipsData[i].x;
+                    this.ships[i].y = shipsData[i].y;
+                    this.ships[i].angle = shipsData[i].angle;
+                }
+    }
+
     damageMotherShip(damage: number) {
         this.health -= damage;
         this.healthText.text = "Health : " + this.health.toString();
@@ -119,7 +171,6 @@ class MotherShip extends Phaser.Sprite {
         this.checkDeath();
     }
 
-    //Socket function    
     onDamage(motherShipData) {
         if (motherShipData.index === this.motherShipIndex) {
             this.health = motherShipData.health;

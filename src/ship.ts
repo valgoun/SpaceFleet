@@ -19,9 +19,10 @@ class Ship extends Phaser.Sprite {
     private weaponsBulletCount = 30;
     private weaponsBulletSpeed = 600;
     private weaponsFireRate = 500;
+    private canShoot: boolean = true;
 
     //Respawn Text
-    respawnText: Phaser.Text;
+    private respawnText: Phaser.Text;
 
     //Creation Variables
     private shipWidth: number = 40 * screenWidthRatio;
@@ -140,12 +141,13 @@ class Ship extends Phaser.Sprite {
         this.weapon.fireRate = this.weaponsFireRate;
         this.weapon.trackSprite(this, 0, 0, true);
 
-        if (this.playerShip) {
+        /*if (this.playerShip) {
             let shootData = { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex };
+
             this.weapon.onFire.add(function () {
-                MainState.instance.socket.emit("shoot", MainState.instance.localPlayerName, shootData)
+                MainState.instance.socket.emit("shoot", shootData)
             }, this);
-        }
+        }*/
     }
 
     createRespawnText() {
@@ -176,39 +178,21 @@ class Ship extends Phaser.Sprite {
     }
 
     update() {
-        if (this.alive) {
+        if (this.alive && MainState.instance.gameStarted) {
             this.shipWeapon();
             this.shipMovement();
-            this.collision();
         }
     }
 
-    //Socket function
-    onMoveShip(shipData) {
-        this.x = shipData.x;
-        this.y = shipData.y;
-        this.angle = shipData.angle;
-
-        /* if (shipData.alive && !this.alive)
-             this.reset(shipData.x, shipData.y);
- 
-         if (!shipData.alive && this.alive)
-             this.kill();*/
-    }
-
-    onShoot(shootData) {
-        this.weapon.fire();
-    }
-
     shipMovement() {
+
+        //Ship acceleration
+        this.game.physics.arcade.accelerationFromRotation(this.rotation, this.shipSpeed, this.body.acceleration);
 
         //Wrap ship
         this.game.world.wrap(this, 16);
 
         if (this.playerShip) {
-
-            //Ship acceleration
-            this.game.physics.arcade.accelerationFromRotation(this.rotation, this.shipSpeed, this.body.acceleration);
 
             //Ship Rotation
             if (this.game.input.keyboard.isDown(this.leftKey) && !this.game.input.keyboard.isDown(this.rightKey)) {
@@ -220,100 +204,58 @@ class Ship extends Phaser.Sprite {
             else {
                 this.body.angularVelocity = 0;
             }
-
-            //Send Ships data
-            let shipData = { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex, x: this.x, y: this.y, angle: this.angle, alive: this.alive };
-            MainState.instance.socket.emit("moveShip", MainState.instance.localPlayerName, shipData);
         }
     }
 
     shipWeapon() {
-        if (this.playerShip && this.playerShip)
-            if (this.game.input.keyboard.isDown(this.leftKey) && this.game.input.keyboard.isDown(this.rightKey))
-                this.weapon.fire();
-    }
-
-    collision() {
-        //Player Ship Collision
-        if (this.playerShip) {
-            this.game.physics.arcade.collide(this, MainState.instance.enemiesMotherShipsGroup, this.shipAgainstMotherShip.bind(this), null, this);
-            this.game.physics.arcade.collide(this, MainState.instance.enemiesShipsGroup, this.shipAgainstShip.bind(this), null, this);
-            this.game.physics.arcade.collide(this, MainState.instance.playerShipsGroup);
-        }
-        else
-            this.game.physics.arcade.collide(this, MainState.instance.playerMotherShipGroup, this.shipAgainstMotherShip.bind(this), null, this);
-
-        //Bullet Against MotherShips
         if (this.playerShip)
-            this.game.physics.arcade.collide(this.weapon.bullets, MainState.instance.enemiesMotherShipsGroup, this.shipAgainstMotherShip.bind(this), null, this);
+            if (this.game.input.keyboard.isDown(this.leftKey) && this.game.input.keyboard.isDown(this.rightKey) && this.canShoot) {
 
-        else
-            this.game.physics.arcade.collide(this.weapon.bullets, MainState.instance.playerMotherShipGroup, this.shipAgainstMotherShip.bind(this), null, this);
+                MainState.instance.socket.emit("shoot", { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex });
+                this.canShoot = false;
 
-        //Friendly Fire
-        //this.game.physics.arcade.collide(this.weapon.bullets, MainState.instance.playerMotherShipGroup, this.shipAgainstMotherShip.bind(this), null, this);
-
-        //Bullet Against Ships
-
-        if (this.playerShip)
-            this.game.physics.arcade.collide(this.weapon.bullets, MainState.instance.enemiesShipsGroup, this.bulletAgainstShip.bind(this), null, this);
-
-        if (!this.playerShip)
-            this.game.physics.arcade.collide(this.weapon.bullets, MainState.instance.playerShipsGroup, this.bulletAgainstShip.bind(this), null, this);
-
-        if (!this.playerShip) //Prevent Friendly Fire
-            this.game.physics.arcade.collide(this.weapon.bullets, MainState.instance.playerShipsGroup, this.bulletAgainstShip.bind(this), null, this);
+                setTimeout(function () { this.canShoot = true; }.bind(this), this.weaponsFireRate);
+            }
     }
 
-    shipAgainstMotherShip(sprite, motherShip: MotherShip) {
-        let damage: number;
-
-        if (sprite instanceof Ship) {
-            this.destroyShip(sprite);
-            damage = this.shipsCrashDamage;
-        }
-        else {
-            sprite.kill();
-            damage = this.shipsWeaponsDamage;
-        }
-
-        if (!this.playerShip)
-            return;
-
-        motherShip.damageMotherShip(damage);
+    onShoot() {
+        this.weapon.fire();
     }
 
-    bulletAgainstShip(bullet: Phaser.Bullet, ship: Ship) {
-        console.log("bullet vs Ship !");
-        bullet.kill();
-        this.destroyShip(ship);
-    }
+    destroyShip() {
+        this.kill();
 
-    shipAgainstShip(thisShip: Ship, otherShip: Ship) {
-        this.destroyShip(thisShip);
-        this.destroyShip(otherShip);
-    }
+        //Send Death Data
+        MainState.instance.socket.emit("death", { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex });
 
-    destroyShip(ship: Ship) {
-        ship.kill();
 
         //Reset Ship
-        if (ship.playerShip) {
-            ship.position = ship.getShipSpawnPosition();
-            ship.angle = ship.motherShip.angle - 90;
+        if (this.playerShip) {
+            this.position = this.getShipSpawnPosition();
+            this.angle = this.motherShip.angle - 90;
 
-            ship.respawnDisplay();
+            this.respawnDisplay();
         }
 
         //Respawn Ship After Delay
-        setTimeout(function () { this.reviveShip(ship); }.bind(this), this.shipsRespawnDelay * 1000);
+        setTimeout(function () { this.reviveShip(); }.bind(this), this.shipsRespawnDelay * 1000);
     }
 
-    reviveShip(ship: Ship) {
-        if (ship.motherShip.alive) {
+    onDeath() {
+        if (this.alive) {
+            this.destroyShip();
+            //console.log("Alive but Destroed Received");
+        }
+        else {
+            //console.log("Already Dead Received");
+        }
+    }
+
+    reviveShip() {
+        if (this.motherShip.alive) {
             //Reset Ship
-            let position = ship.getShipSpawnPosition();
-            ship.reset(position.x, position.y);
+            let position = this.getShipSpawnPosition();
+            this.reset(position.x, position.y);
         }
     }
 

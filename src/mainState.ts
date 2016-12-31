@@ -4,23 +4,24 @@ class MainState extends Phaser.State {
     static instance: MainState;
 
     //Global Variables
+    public ready: boolean = false;
+    public gameStarted: boolean = false;
     public gameOver: boolean = false;
     public localPlayerDead: boolean = false;
 
     //Sockets Settings
     public socket: SocketIOClient.Socket;
     public localPlayerName: string;
+    public playersReady = [];
     public playersName = [];
 
-    //Ships
+    //Mother Ships
     public motherShips: MotherShip[];
+    public playerMotherShipIndex: number;
 
-    //Ships Weapons
-    private weapons: Phaser.Weapon[][];
-
-    //Texts
-    private healthTexts: Phaser.Text[];
-    private respawnTexts: Phaser.Text[][];
+    //Ship Damages
+    private shipsCrashDamage: number = 10;
+    private shipsWeaponsDamage: number = 2;
 
     //Groups For Sprite Rendering Sort and Collision Layer
     public playerMotherShipGroup: Phaser.Group;
@@ -28,13 +29,31 @@ class MainState extends Phaser.State {
     public playerShipsGroup: Phaser.Group;
     public enemiesShipsGroup: Phaser.Group;
     public weaponsBulletsGroup: Phaser.Group;
-    public enemiesWeaponsBulletsGroup: Phaser.Group;
 
     constructor() {
         super();
 
         if (typeof MainState.instance === 'undefined')
             MainState.instance = this;
+    }
+
+    everyoneReady(playerName) {
+        this.playersReady[this.playersName.indexOf(playerName)] = playerName;
+
+        let playerReadyCount = 0;
+
+        for (let i = 0; i < this.playersReady.length; i++)
+            if (typeof this.playersReady[i] !== 'undefined')
+                playerReadyCount++;
+
+        if (playerReadyCount === this.playersName.length) {
+            this.gameStarted = true;
+            let date = new Date();
+            //console.log("EO Ready !!");
+        }
+        else {
+            //console.log("NOT EO Ready !!");
+        }
     }
 
     //Load Images For Sprites
@@ -46,19 +65,13 @@ class MainState extends Phaser.State {
 
     //Setup Game
     create() {
-        this.setEventHandlers();
+        MainState.instance.socket.on("ready", (playerName) => {
+            this.everyoneReady(playerName)
+        });
 
         //Initialize Arrays
         this.motherShips = [];
-        this.weapons = [];
-        for (let i = 0; i < 4; i++) {
-            this.weapons[i] = [];
-        }
-        this.healthTexts = [];
-        this.respawnTexts = [];
-        for (let i = 0; i < 4; i++) {
-            this.respawnTexts[i] = [];
-        }
+        this.playersReady = [];
 
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -70,26 +83,11 @@ class MainState extends Phaser.State {
         this.playerShipsGroup = this.game.add.physicsGroup();
         this.enemiesShipsGroup = this.game.add.physicsGroup();
         this.weaponsBulletsGroup = this.game.add.physicsGroup();
-        this.enemiesWeaponsBulletsGroup = this.game.add.physicsGroup();
 
-        this.startGame();
+        this.createGame();
     }
 
-    //Setup Listeners  
-    setEventHandlers() {
-        //Socket Listener
-        MainState.instance.socket.on("moveShip", (playerName, shipData) => {
-            if (this.localPlayerName !== playerName)
-                this.motherShips[shipData.motherShipIndex].ships[shipData.shipIndex].onMoveShip(shipData);
-        });
-
-        MainState.instance.socket.on("shoot", (playerName, shootData) => {
-            if (this.localPlayerName !== playerName)
-                this.motherShips[shootData.motherShipIndex].ships[shootData.shipIndex].onShoot(shootData);
-        });
-    }
-
-    startGame() {
+    createGame() {
         //Create Fleets
         //console.log("Local Name : " + this.localPlayerName);
 
@@ -101,7 +99,7 @@ class MainState extends Phaser.State {
         }
     }
 
-    createFleet(playerMotherShip: boolean, shipsCount: number = 1) {
+    createFleet(playerMotherShip: boolean, shipsCount: number = 2) {
         let index = 0;
 
         //Check Which Slot is Free
@@ -112,6 +110,9 @@ class MainState extends Phaser.State {
             }
 
         this.motherShips[index] = new MotherShip(this.game, this.localPlayerName, playerMotherShip, index, 'MotherShip');
+
+        if (playerMotherShip)
+            this.playerMotherShipIndex = index;
 
         //Set Group
         if (playerMotherShip)
@@ -130,9 +131,93 @@ class MainState extends Phaser.State {
             }
             else {
                 this.enemiesShipsGroup.add(this.motherShips[index].ships[i]);
-                this.enemiesWeaponsBulletsGroup.add(this.motherShips[index].ships[i].weapon.bullets);
+                this.weaponsBulletsGroup.add(this.motherShips[index].ships[i].weapon.bullets);
             }
         }
+
+        MainState.instance.socket.emit("ready", this.localPlayerName);
+    }
+
+    update() {
+        if (this.gameStarted)
+            this.collisions();
+    }
+
+    collisions() {
+        //Players Ships Collision
+        this.game.physics.arcade.collide(this.playerShipsGroup);
+        this.game.physics.arcade.collide(this.playerShipsGroup, this.enemiesShipsGroup, this.shipAgainstShip.bind(this), null, this);
+        this.game.physics.arcade.collide(this.playerShipsGroup, this.enemiesMotherShipsGroup, this.shipAgainstMotherShip.bind(this), null, this);
+
+        //Enemies Ships Collisions
+        this.game.physics.arcade.collide(this.enemiesShipsGroup);
+        this.game.physics.arcade.collide(this.enemiesShipsGroup, this.playerMotherShipGroup, this.shipAgainstMotherShip.bind(this), null, this);
+
+        //Weapons Bullets Collisions
+        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.enemiesMotherShipsGroup, this.bulletAgainstMotherShip.bind(this), null, this);
+        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.enemiesShipsGroup, this.bulletAgainstShip.bind(this), null, this);
+        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerShipsGroup, this.bulletAgainstShip.bind(this), null, this);
+        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerMotherShipGroup, this.bulletAgainstMotherShip.bind(this), null, this);
+    }
+
+    shipAgainstMotherShip(ship: Ship, motherShip: MotherShip) {
+        //console.log("Ship vs MotherShip !");
+        ship.destroyShip();
+
+        if (!ship.playerShip)
+            return;
+
+        motherShip.damageMotherShip(this.shipsCrashDamage);
+    }
+
+    shipAgainstShip(thisShip: Ship, otherShip: Ship) {
+        //console.log("Ship vs Ship !");
+        thisShip.destroyShip();
+        otherShip.destroyShip();
+    }
+
+    bulletAgainstMotherShip(bullet: Phaser.Bullet, motherShip: MotherShip) {
+        //console.log("bullet vs MotherShip !");
+        let bulletInfos = this.getBulletInfo(bullet);
+
+        //Prevent From Shooting On Its Own MotherShip
+        if (bulletInfos.motherShipIndex !== motherShip.motherShipIndex) {
+            bullet.kill();
+
+            if (bulletInfos.motherShipIndex === this.playerMotherShipIndex)
+                motherShip.damageMotherShip(this.shipsWeaponsDamage);
+        }
+    }
+
+    bulletAgainstShip(bullet: Phaser.Bullet, ship: Ship) {
+        //console.log("bullet vs Ship !");
+        let bulletInfos = this.getBulletInfo(bullet);
+
+        //Enemy Fire        
+        if (bulletInfos.motherShipIndex !== ship.motherShip.motherShipIndex) {
+            bullet.kill();
+            ship.destroyShip();
+        }
+        //Friendly Fire        
+        else {
+            //bullet.kill();
+            //ship.destroyShip();
+        }
+    }
+
+    getBulletInfo(bullet: Phaser.Bullet) {
+        let motherShipIndex = 0;
+        let shipIndex = 0;
+
+        for (let i = 0; i < this.motherShips.length; i++)
+            for (let j = 0; j < this.motherShips[i].ships.length; j++)
+                if (this.motherShips[i].ships[j].weapon.bullets.contains(bullet)) {
+                    motherShipIndex = i;
+                    shipIndex = j;
+                    break;
+                }
+
+        return { motherShipIndex: motherShipIndex, shipIndex: shipIndex };
     }
 
     checkGameOver() {
@@ -168,17 +253,12 @@ class MainState extends Phaser.State {
         //Debug Colliders
         for (let i = 0; i < this.motherShips.length; i++) {
             if (typeof this.motherShips[i] !== 'undefined' && this.motherShips[i].alive)
-                this.game.debug.body(this.motherShips[i]);
+                //this.game.debug.body(this.motherShips[i]);
 
-            for (let j = 0; j < this.motherShips[i].ships.length; j++)
-                if (typeof this.motherShips[i].ships[j] !== 'undefined' && this.motherShips[i].ships[j].alive) {
-                    this.game.debug.body(this.motherShips[i].ships[j]);
-                }
+                for (let j = 0; j < this.motherShips[i].ships.length; j++)
+                    if (typeof this.motherShips[i].ships[j] !== 'undefined' && this.motherShips[i].ships[j].alive) {
+                        //this.game.debug.body(this.motherShips[i].ships[j]);
+                    }
         }
-
-        for (let i = 0; i < this.healthTexts.length; i++)
-            if (typeof this.healthTexts[i] !== 'undefined') {
-                //this.game.debug.geom(this.healthTexts[i].textBounds);
-            }
     }
 }
