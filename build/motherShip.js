@@ -30,6 +30,7 @@ var MotherShip = (function (_super) {
         _this.height = _this.motherShipHeight;
         _this.setupMotherShip(playerMotherShip);
         _this.createHealthText();
+        _this.createLeaverText();
         _this.setEventHandlers();
         game.add.existing(_this);
         return _this;
@@ -38,7 +39,6 @@ var MotherShip = (function (_super) {
         //Set Physics Settings
         this.game.physics.arcade.enable(this);
         this.body.immovable = true;
-        this.body.collideWorldBounds = true;
         this.anchor.x = 0.5;
         this.anchor.y = 0.5;
         //Set Collider Bounds
@@ -75,6 +75,30 @@ var MotherShip = (function (_super) {
         this.healthText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.healthText.anchor.x = 0.5;
         this.healthText.anchor.y = 0.5;
+    };
+    MotherShip.prototype.createLeaverText = function () {
+        var x = this.position.x;
+        var y = this.position.y;
+        switch (this.motherShipIndex) {
+            case 0:
+                y += 80 * screenWidthRatio;
+                break;
+            case 1:
+                y -= 80 * screenWidthRatio;
+                break;
+            case 2:
+                x -= 90 * screenWidthRatio;
+                break;
+            case 3:
+                x += 90 * screenWidthRatio;
+                break;
+        }
+        var style = { font: "bold 14px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+        this.leaverText = this.game.add.text(x, y, "Player has left!", style);
+        this.leaverText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.leaverText.anchor.x = 0.5;
+        this.leaverText.anchor.y = 0.5;
+        this.leaverText.visible = false;
     };
     MotherShip.prototype.setEventHandlers = function () {
         var _this = this;
@@ -145,6 +169,7 @@ var MotherShip = (function (_super) {
                 console.log("Local Player's Dead !!");
             }
             this.kill();
+            MainState.instance.playersDead[this.motherShipIndex] = true;
             MainState.instance.checkGameOver();
             this.healthText.text = "Dead !";
             setTimeout(function () { this.healthText.destroy(); }.bind(this), 2 * 1000);

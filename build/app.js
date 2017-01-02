@@ -59,6 +59,12 @@ var Server = (function () {
         socket.on('death', function (deathData) {
             _this.OnDeath(deathData, socket);
         });
+        socket.on('asteroids', function (asteroidsData) {
+            _this.OnAsteroid(asteroidsData, socket);
+        });
+        socket.on('moveAsteroid', function (asteroidsData) {
+            _this.onMoveAsteroid(asteroidsData, socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -240,6 +246,32 @@ var Server = (function () {
             })[0];
             if (g) {
                 socket.to(g.Name).broadcast.emit("death", deathData);
+            }
+        }
+    };
+    Server.prototype.OnAsteroid = function (asteroidsData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("asteroids", asteroidsData);
+            }
+        }
+    };
+    Server.prototype.onMoveAsteroid = function (asteroidsData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("moveAsteroid", asteroidsData);
             }
         }
     };

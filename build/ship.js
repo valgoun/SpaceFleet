@@ -192,7 +192,7 @@ var Ship = (function (_super) {
         }
     };
     Ship.prototype.reviveShip = function () {
-        if (this.motherShip.alive) {
+        if (this.motherShip.alive && MainState.instance.playersDead[this.motherShip.motherShipIndex] !== true) {
             //Reset Ship
             var position = this.getShipSpawnPosition();
             this.reset(position.x, position.y);

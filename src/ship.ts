@@ -252,7 +252,7 @@ class Ship extends Phaser.Sprite {
     }
 
     reviveShip() {
-        if (this.motherShip.alive) {
+        if (this.motherShip.alive && MainState.instance.playersDead[this.motherShip.motherShipIndex] !== true) {
             //Reset Ship
             let position = this.getShipSpawnPosition();
             this.reset(position.x, position.y);

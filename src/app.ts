@@ -74,6 +74,14 @@ class Server {
         socket.on('death', (deathData) => {
             this.OnDeath(deathData, socket);
         });
+
+        socket.on('asteroids', (asteroidsData) => {
+            this.OnAsteroid(asteroidsData, socket);
+        });
+
+        socket.on('moveAsteroid', (asteroidsData) => {
+            this.onMoveAsteroid(asteroidsData, socket);
+        });
     }
 
     OnFleetName(name: string, socket: SocketIO.Socket) {
@@ -274,6 +282,36 @@ class Server {
 
             if (g) {
                 socket.to(g.Name).broadcast.emit("death", deathData);
+            }
+        }
+    }
+
+    OnAsteroid(asteroidsData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+
+            if (g) {
+                socket.to(g.Name).broadcast.emit("asteroids", asteroidsData);
+            }
+        }
+    }
+
+    onMoveAsteroid(asteroidsData, socket: SocketIO.Socket) {
+        let p = this.players.filter((val) => {
+            return val.socket === socket
+        })[0];
+        if (p) {
+            let g = this.Games.filter((val) => {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+
+            if (g) {
+                socket.to(g.Name).broadcast.emit("moveAsteroid", asteroidsData);
             }
         }
     }

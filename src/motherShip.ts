@@ -11,6 +11,9 @@ class MotherShip extends Phaser.Sprite {
     //Health text
     private healthText: Phaser.Text;
 
+    //Health text
+    public leaverText: Phaser.Text;
+
     //Creation Variables
     private motherShipWidth: number = 240 * screenWidthRatio;
     private motherShipHeight: number = 120 * screenWidthRatio;
@@ -47,6 +50,7 @@ class MotherShip extends Phaser.Sprite {
 
         this.setupMotherShip(playerMotherShip);
         this.createHealthText();
+        this.createLeaverText();
         this.setEventHandlers();
 
         game.add.existing(this);
@@ -57,7 +61,6 @@ class MotherShip extends Phaser.Sprite {
         //Set Physics Settings
         this.game.physics.arcade.enable(this);
         this.body.immovable = true;
-        this.body.collideWorldBounds = true;
         this.anchor.x = 0.5;
         this.anchor.y = 0.5;
 
@@ -101,6 +104,35 @@ class MotherShip extends Phaser.Sprite {
         this.healthText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
         this.healthText.anchor.x = 0.5;
         this.healthText.anchor.y = 0.5;
+    }
+
+    createLeaverText() {
+        let x: number = this.position.x;
+        let y: number = this.position.y;
+
+        switch (this.motherShipIndex) {
+            case 0:
+                y += 80 * screenWidthRatio;
+                break;
+            case 1:
+                y -= 80 * screenWidthRatio;
+                break;
+            case 2:
+                x -= 90 * screenWidthRatio;
+                break;
+            case 3:
+                x += 90 * screenWidthRatio;
+                break;
+        }
+
+        let style = { font: "bold 14px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+
+        this.leaverText = this.game.add.text(x, y, "Player has left!", style);
+        this.leaverText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        this.leaverText.anchor.x = 0.5;
+        this.leaverText.anchor.y = 0.5;
+
+        this.leaverText.visible = false;
     }
 
     setEventHandlers() {
@@ -153,6 +185,7 @@ class MotherShip extends Phaser.Sprite {
         if (index === this.motherShipIndex)
             for (let i = 0; i < 3; i++)
                 if (typeof this.ships[i] !== 'undefined') {
+
                     this.ships[i].x = shipsData[i].x;
                     this.ships[i].y = shipsData[i].y;
                     this.ships[i].angle = shipsData[i].angle;
@@ -189,6 +222,7 @@ class MotherShip extends Phaser.Sprite {
             }
 
             this.kill();
+            MainState.instance.playersDead[this.motherShipIndex] = true;
             MainState.instance.checkGameOver();
 
             this.healthText.text = "Dead !";
