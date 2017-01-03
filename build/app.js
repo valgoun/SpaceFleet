@@ -278,6 +278,12 @@ var Server = (function () {
     //when host of a game disconnect or leave
     Server.prototype.ReHost = function (game) {
         //todo
+        console.log("Rehost " + game.Players.length);
+        if (game.Players.length == 0) {
+            this.Games.splice(this.Games.indexOf(game), 1);
+            console.log(this.Games.length);
+            return;
+        }
         game.Host = this.players.filter(function (val) {
             return val.name === game.Players[0];
         })[0];

@@ -319,6 +319,12 @@ class Server {
     //when host of a game disconnect or leave
     ReHost(game: Lobby) {
         //todo
+        console.log("Rehost " + game.Players.length);
+        if (game.Players.length == 0) {
+            this.Games.splice(this.Games.indexOf(game), 1);
+            console.log(this.Games.length);
+            return;
+        }
         game.Host = this.players.filter((val) => {
             return val.name === game.Players[0];
         })[0];
