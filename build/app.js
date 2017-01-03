@@ -43,6 +43,28 @@ var Server = (function () {
         socket.on('Play', function () {
             _this.OnPlay(socket);
         });
+        //Phaser msg function binding
+        socket.on('ready', function (playerName) {
+            _this.OnReady(playerName, socket);
+        });
+        socket.on('moveShip', function (index, shipsData) {
+            _this.OnMoveShip(index, shipsData, socket);
+        });
+        socket.on('damage', function (motherShipData) {
+            _this.OnDamage(motherShipData, socket);
+        });
+        socket.on('shoot', function (shootData) {
+            _this.OnShoot(shootData, socket);
+        });
+        socket.on('death', function (deathData) {
+            _this.OnDeath(deathData, socket);
+        });
+        socket.on('asteroids', function (asteroidsData) {
+            _this.OnAsteroid(asteroidsData, socket);
+        });
+        socket.on('moveAsteroid', function (asteroidsData) {
+            _this.onMoveAsteroid(asteroidsData, socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -161,9 +183,107 @@ var Server = (function () {
             return;
         }
     };
+    //Phaser functions
+    Server.prototype.OnReady = function (playerName, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                this.sio.in(g.Name).emit("ready", playerName);
+            }
+        }
+    };
+    Server.prototype.OnMoveShip = function (index, shipsData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("moveShip", index, shipsData);
+            }
+        }
+    };
+    Server.prototype.OnDamage = function (motherShipData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("damage", motherShipData);
+            }
+        }
+    };
+    Server.prototype.OnShoot = function (shootData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                this.sio.in(g.Name).emit("shoot", shootData);
+            }
+        }
+    };
+    Server.prototype.OnDeath = function (deathData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("death", deathData);
+            }
+        }
+    };
+    Server.prototype.OnAsteroid = function (asteroidsData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("asteroids", asteroidsData);
+            }
+        }
+    };
+    Server.prototype.onMoveAsteroid = function (asteroidsData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("moveAsteroid", asteroidsData);
+            }
+        }
+    };
     //when host of a game disconnect or leave
     Server.prototype.ReHost = function (game) {
         //todo
+        console.log("Rehost " + game.Players.length);
+        if (game.Players.length == 0) {
+            this.Games.splice(this.Games.indexOf(game), 1);
+            console.log(this.Games.length);
+            return;
+        }
         game.Host = this.players.filter(function (val) {
             return val.name === game.Players[0];
         })[0];

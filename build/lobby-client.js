@@ -94,15 +94,15 @@ var LobbyClient = (function () {
         this.socket.on("LaunchGame", function (players) {
             _this.ActualLobby.hide();
             console.log("LaunchGame");
-            _this.game = new SimpleGame();
-            //LAUNCH THE GAME
-            /*
-            players is the players list
-            use this and LocalName to get the player id if needed
-            */
+            _this.game = new SpaceFleet(_this.socket, _this.LocalName, players);
+            //this.game = new OldGame.SimpleGame();
+            //this.game.setupGame(this.socket, this.LocalName, players);
         });
     };
     return LobbyClient;
 }());
+window.onload = function () {
+    //var game = new SpaceFleet(this.socket, "Player1", ["Player1", "Player2", "Player3", "Player4"]);
+};
 var lb = new LobbyClient();
 //# sourceMappingURL=lobby-client.js.map
