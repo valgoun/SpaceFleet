@@ -75,6 +75,10 @@ class LobbyClient {
             this.socket.emit("Play");
             return false;
         });
+        $("#Refresh").click(() => {
+            console.log("Refresh");
+            this.socket.emit("refreshLobbyList");
+        });
 
         //socket binding
         this.socket.on("LobbyConnection", (name: string, players: string[]) => {

@@ -56,6 +56,10 @@ var LobbyClient = (function () {
             _this.socket.emit("Play");
             return false;
         });
+        $("#Refresh").click(function () {
+            console.log("Refresh");
+            _this.socket.emit("refreshLobbyList");
+        });
         //socket binding
         this.socket.on("LobbyConnection", function (name, players) {
             _this.ActualLobby.show();
