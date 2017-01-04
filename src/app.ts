@@ -47,6 +47,9 @@ class Server {
         socket.on('Join', (lobby: string) => {
             this.OnJoin(socket, lobby);
         });
+        socket.on('PasswordJoin', (lobby: string, password: string) => {
+            this.OnJoin(socket, lobby, password);
+        });
         socket.on('Leave', () => {
             this.OnLeave(socket);
         });
@@ -98,7 +101,7 @@ class Server {
         socket.emit("LobbyList", names);
     }
 
-    OnJoin(socket: SocketIO.Socket, lobbyName: string) {
+    OnJoin(socket: SocketIO.Socket, lobbyName: string, password: string = "") {
         let p = this.players.filter((val) => {
             return val.socket === socket
         })[0];
@@ -108,12 +111,16 @@ class Server {
             let g = this.Games.filter((val) => {
                 return val.Name === lobbyName;
             })[0];
-            g.Players.push(p.name);
-            socket.emit("LobbyConnection", g.Name, g.Players);
-            socket.join(g.Name);
-            socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
-            if (g.Players.length == 2)
-                g.Host.socket.emit("GameReady");
+            if (g.Password == password) {
+                g.Players.push(p.name);
+                socket.emit("LobbyConnection", g.Name, g.Players);
+                socket.join(g.Name);
+                socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
+                if (g.Players.length == 2)
+                    g.Host.socket.emit("GameReady");
+            } else {
+                socket.emit("PasswordCheck", g.Name);
+            }
         }
     }
 

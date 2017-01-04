@@ -98,6 +98,13 @@ var LobbyClient = (function () {
             //this.game = new OldGame.SimpleGame();
             //this.game.setupGame(this.socket, this.LocalName, players);
         });
+        this.socket.on("PasswordCheck", function (lobby) {
+            var password = prompt("Password", "");
+            if (password != "" && password != null)
+                _this.socket.emit("PasswordJoin", lobby, password);
+            else
+                _this.SelectionLobby.show();
+        });
     };
     return LobbyClient;
 }());
