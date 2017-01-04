@@ -37,6 +37,9 @@ var Server = (function () {
         socket.on('Join', function (lobby) {
             _this.OnJoin(socket, lobby);
         });
+        socket.on('PasswordJoin', function (lobby, password) {
+            _this.OnJoin(socket, lobby, password);
+        });
         socket.on('Leave', function () {
             _this.OnLeave(socket);
         });
@@ -78,7 +81,8 @@ var Server = (function () {
         });
         socket.emit("LobbyList", names);
     };
-    Server.prototype.OnJoin = function (socket, lobbyName) {
+    Server.prototype.OnJoin = function (socket, lobbyName, password) {
+        if (password === void 0) { password = ""; }
         var p = this.players.filter(function (val) {
             return val.socket === socket;
         })[0];
@@ -89,12 +93,17 @@ var Server = (function () {
             var g = this.Games.filter(function (val) {
                 return val.Name === lobbyName;
             })[0];
-            g.Players.push(p.name);
-            socket.emit("LobbyConnection", g.Name, g.Players);
-            socket.join(g.Name);
-            socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
-            if (g.Players.length == 2)
-                g.Host.socket.emit("GameReady");
+            if (g.Password == password) {
+                g.Players.push(p.name);
+                socket.emit("LobbyConnection", g.Name, g.Players);
+                socket.join(g.Name);
+                socket.to(g.Name).broadcast.emit('PlayerJoined', p.name);
+                if (g.Players.length == 2)
+                    g.Host.socket.emit("GameReady");
+            }
+            else {
+                socket.emit("PasswordCheck", g.Name);
+            }
         }
     };
     Server.prototype.OnCreateLobby = function (name, password, socket) {

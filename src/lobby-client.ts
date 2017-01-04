@@ -123,6 +123,14 @@ class LobbyClient {
             //this.game = new OldGame.SimpleGame();
             //this.game.setupGame(this.socket, this.LocalName, players);
         });
+        this.socket.on("PasswordCheck", (lobby: string) => {
+            let password = prompt("Password", "");
+            if (password != "" && password != null)
+                this.socket.emit("PasswordJoin", lobby, password);
+            else
+                this.SelectionLobby.show();
+        });
+
 
     }
 }
