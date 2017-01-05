@@ -80,19 +80,20 @@ class LobbyClient {
             this.socket.emit("refreshLobbyList");
         });
 
+
         //socket binding
         this.socket.on("LobbyConnection", (name: string, players: string[]) => {
             this.ActualLobby.show();
             $("#LobbyTitle").text(name);
             players.forEach(element => {
-                $("#LobbyTitle").after("<p>" + element + "<p>");
+                $("#PlayerList").append("<p>" + element + "<p>");
             });
         });
         this.socket.on("LobbyList", (entries: string[]) => {
             let contener = $("#Entries");
             contener.empty();
             entries.forEach((lobby, index) => {
-                contener.append('<form>' + lobby + '<button id="' + index + 'Btn">Connect</button></form>');
+                contener.append('<form><button id="' + index + 'Btn">' + lobby + '</button></form>');
                 $("#" + index + 'Btn').click(() => {
                     console.log(lobby);
                     this.socket.emit("Join", lobby);
@@ -103,7 +104,7 @@ class LobbyClient {
         });
         this.socket.on("PlayerJoined", (name: string) => {
             console.log("caca");
-            $("#LobbyTitle").after("<p>" + name + "</p>");
+            $("#PlayerList").append("<p>" + name + "</p>");
         });
         this.socket.on("PlayerLeave", (name: string) => {
             console.log("Leaver !!!!!");

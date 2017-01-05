@@ -65,14 +65,14 @@ var LobbyClient = (function () {
             _this.ActualLobby.show();
             $("#LobbyTitle").text(name);
             players.forEach(function (element) {
-                $("#LobbyTitle").after("<p>" + element + "<p>");
+                $("#PlayerList").append("<p>" + element + "<p>");
             });
         });
         this.socket.on("LobbyList", function (entries) {
             var contener = $("#Entries");
             contener.empty();
             entries.forEach(function (lobby, index) {
-                contener.append('<form>' + lobby + '<button id="' + index + 'Btn">Connect</button></form>');
+                contener.append('<form><button id="' + index + 'Btn">' + lobby + '</button></form>');
                 $("#" + index + 'Btn').click(function () {
                     console.log(lobby);
                     _this.socket.emit("Join", lobby);
@@ -83,7 +83,7 @@ var LobbyClient = (function () {
         });
         this.socket.on("PlayerJoined", function (name) {
             console.log("caca");
-            $("#LobbyTitle").after("<p>" + name + "</p>");
+            $("#PlayerList").append("<p>" + name + "</p>");
         });
         this.socket.on("PlayerLeave", function (name) {
             console.log("Leaver !!!!!");

@@ -1,0 +1,129 @@
+body{
+    background-color: #212121;
+    font-family: Roboto, sans-serif;
+    color: #FFFFFF;
+    width: 50%;
+    height: 100vh;
+    margin: auto;
+}
+
+
+
+#SelectName{
+    margin-top: 50vh;
+}
+
+#SelectName form{
+    max-width: 300px;
+    text-align: center;
+    margin: auto;
+}
+
+#ChoosePanel{
+    margin-top: 50vh;
+}
+
+#ChoosePanel form{
+    text-align: center;
+    margin: auto;
+}
+
+#CreationLobby {
+    margin-top: 50vh;
+}
+
+#CreationLobby form{
+    text-align: center;
+}
+
+#CreationLobby form *{
+    margin-top: 10px;
+    margin-right: 25%;
+    margin-left: 25%;
+}
+
+
+
+button{
+    border: 0;
+    padding: 10px;
+    font-family: inherit;
+    background-color: inherit;
+    color: inherit;
+    border: 1px solid white;
+    border-radius: 2px;
+}
+
+button:hover{
+    border: 1px solid dodgerblue;
+    color: dodgerblue;
+}
+
+input{
+    margin: auto;
+    padding: 10px;
+    padding-left: 0;
+    font-family: inherit;
+    border: none;
+    border-bottom: 1px solid white;
+    background-color: inherit;
+    color: white;
+}
+
+input:focus{
+    border-bottom: 1px solid dodgerblue;
+}
+
+#Lobby{
+    margin: 50vh auto;
+    padding: 10px;
+    /*min-height: 200px;*/
+    max-width: 500px;
+}
+
+#Lobby h2{
+    margin: auto;
+    border-bottom: 1px solid white;
+    padding-bottom: 10px;
+}
+
+#PlayerList {
+    min-height: 150px;
+}
+
+#PlayBtn {
+    text-align: right;
+    float: right;
+}
+
+#SelectionLobby{
+    margin: 50vh auto;
+    max-width: 500px;
+    text-align: right;
+}
+
+#Entries{
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+#Entries button{
+    border: none;
+    border-bottom: 1px solid white;
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+}
+
+#Entries button:hover{
+    border-bottom: 1px solid dodgerblue;
+}
+
+button.material-icons{
+    border: none;
+    padding: 0px;
+    font-size: 30px;
+}
+
+
+
