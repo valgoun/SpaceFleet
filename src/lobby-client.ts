@@ -9,6 +9,7 @@ class LobbyClient {
     CreationLobby: JQuery;
     SelectionLobby: JQuery;
     ActualLobby: JQuery;
+    TitleImg: JQuery;
 
     //the name of the local player
     LocalName: string;
@@ -28,6 +29,7 @@ class LobbyClient {
         this.CreationLobby = $("#CreationLobby");
         this.SelectionLobby = $("#SelectionLobby");
         this.ActualLobby = $("#Lobby");
+        this.TitleImg = $("#TitleImg");
 
         //Button binding
         $("#Go").click(() => {
@@ -45,6 +47,7 @@ class LobbyClient {
 
             this.ChoosePanel.hide();
             this.SelectionLobby.show();
+            this.TitleImg.hide();
             return false;
         });
         $("#Create").click(() => {
@@ -66,6 +69,7 @@ class LobbyClient {
             this.ActualLobby.hide();
             $("#Play").hide();
             this.ChoosePanel.show();
+            this.TitleImg.show();
             $("#Lobby p").remove();
             this.socket.emit("Leave");
             return false;
@@ -75,20 +79,26 @@ class LobbyClient {
             this.socket.emit("Play");
             return false;
         });
+        $("#Refresh").click(() => {
+            console.log("Refresh");
+            this.socket.emit("refreshLobbyList");
+        });
+
 
         //socket binding
         this.socket.on("LobbyConnection", (name: string, players: string[]) => {
             this.ActualLobby.show();
+            this.TitleImg.hide();
             $("#LobbyTitle").text(name);
             players.forEach(element => {
-                $("#LobbyTitle").after("<p>" + element + "<p>");
+                $("#PlayerList").append("<p>" + element + "<p>");
             });
         });
         this.socket.on("LobbyList", (entries: string[]) => {
             let contener = $("#Entries");
             contener.empty();
             entries.forEach((lobby, index) => {
-                contener.append('<form>' + lobby + '<button id="' + index + 'Btn">Connect</button></form>');
+                contener.append('<form><button id="' + index + 'Btn">' + lobby + '</button></form>');
                 $("#" + index + 'Btn').click(() => {
                     console.log(lobby);
                     this.socket.emit("Join", lobby);
@@ -99,7 +109,7 @@ class LobbyClient {
         });
         this.socket.on("PlayerJoined", (name: string) => {
             console.log("caca");
-            $("#LobbyTitle").after("<p>" + name + "</p>");
+            $("#PlayerList").append("<p>" + name + "</p>");
         });
         this.socket.on("PlayerLeave", (name: string) => {
             console.log("Leaver !!!!!");
@@ -114,7 +124,7 @@ class LobbyClient {
         this.socket.on("LaunchGame", (players: string[]) => {
             this.ActualLobby.hide();
             console.log("LaunchGame");
-
+            $("Body").width(1024);
             this.game = new SpaceFleet(this.socket, this.LocalName, players);
             //this.game = new OldGame.SimpleGame();
             //this.game.setupGame(this.socket, this.LocalName, players);
@@ -126,6 +136,7 @@ class LobbyClient {
             else
                 this.SelectionLobby.show();
         });
+
 
     }
 }

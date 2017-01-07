@@ -12,6 +12,7 @@ var LobbyClient = (function () {
         this.CreationLobby = $("#CreationLobby");
         this.SelectionLobby = $("#SelectionLobby");
         this.ActualLobby = $("#Lobby");
+        this.TitleImg = $("#TitleImg");
         //Button binding
         $("#Go").click(function () {
             console.log("Go");
@@ -26,6 +27,7 @@ var LobbyClient = (function () {
             _this.socket.emit("refreshLobbyList");
             _this.ChoosePanel.hide();
             _this.SelectionLobby.show();
+            _this.TitleImg.hide();
             return false;
         });
         $("#Create").click(function () {
@@ -47,6 +49,7 @@ var LobbyClient = (function () {
             _this.ActualLobby.hide();
             $("#Play").hide();
             _this.ChoosePanel.show();
+            _this.TitleImg.show();
             $("#Lobby p").remove();
             _this.socket.emit("Leave");
             return false;
@@ -56,19 +59,24 @@ var LobbyClient = (function () {
             _this.socket.emit("Play");
             return false;
         });
+        $("#Refresh").click(function () {
+            console.log("Refresh");
+            _this.socket.emit("refreshLobbyList");
+        });
         //socket binding
         this.socket.on("LobbyConnection", function (name, players) {
             _this.ActualLobby.show();
+            _this.TitleImg.hide();
             $("#LobbyTitle").text(name);
             players.forEach(function (element) {
-                $("#LobbyTitle").after("<p>" + element + "<p>");
+                $("#PlayerList").append("<p>" + element + "<p>");
             });
         });
         this.socket.on("LobbyList", function (entries) {
             var contener = $("#Entries");
             contener.empty();
             entries.forEach(function (lobby, index) {
-                contener.append('<form>' + lobby + '<button id="' + index + 'Btn">Connect</button></form>');
+                contener.append('<form><button id="' + index + 'Btn">' + lobby + '</button></form>');
                 $("#" + index + 'Btn').click(function () {
                     console.log(lobby);
                     _this.socket.emit("Join", lobby);
@@ -79,7 +87,7 @@ var LobbyClient = (function () {
         });
         this.socket.on("PlayerJoined", function (name) {
             console.log("caca");
-            $("#LobbyTitle").after("<p>" + name + "</p>");
+            $("#PlayerList").append("<p>" + name + "</p>");
         });
         this.socket.on("PlayerLeave", function (name) {
             console.log("Leaver !!!!!");
@@ -94,6 +102,7 @@ var LobbyClient = (function () {
         this.socket.on("LaunchGame", function (players) {
             _this.ActualLobby.hide();
             console.log("LaunchGame");
+            $("Body").width(1024);
             _this.game = new SpaceFleet(_this.socket, _this.LocalName, players);
             //this.game = new OldGame.SimpleGame();
             //this.game.setupGame(this.socket, this.LocalName, players);
