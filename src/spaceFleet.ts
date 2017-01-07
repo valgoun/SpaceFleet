@@ -1,6 +1,6 @@
 //Global Screen Variables
-const screenWidth = 1024;
-const screenHeight = 576;
+const screenWidth = 1600;
+const screenHeight = 900;
 const screenWidthRatio = 1 + ((this.screenWidth - 1024) / 1024);
 
 class SpaceFleet extends Phaser.Game {

@@ -67,10 +67,24 @@ class MainState extends Phaser.State {
 
     //Load Images For Sprites
     preload() {
-        this.game.load.image('Ship', 'src/assets/Ship.png');
-        this.game.load.image('MotherShip', 'src/assets/MotherShip.png');
-        this.game.load.image('Bullet', 'src/assets/Bullet.png');
+        this.game.load.image('Ship1', 'src/assets/Ship1.png');
+        this.game.load.image('Ship2', 'src/assets/Ship2.png');
+        this.game.load.image('Ship3', 'src/assets/Ship3.png');
+        this.game.load.image('Ship4', 'src/assets/Ship4.png');
+
+        this.game.load.image('MotherShip1', 'src/assets/MotherShip1.png');
+        this.game.load.image('MotherShip2', 'src/assets/MotherShip2.png');
+        this.game.load.image('MotherShip3', 'src/assets/MotherShip3.png');
+        this.game.load.image('MotherShip4', 'src/assets/MotherShip4.png');
+
+        this.game.load.image('Bullet1', 'src/assets/Bullet1.png');
+        this.game.load.image('Bullet2', 'src/assets/Bullet2.png');
+        this.game.load.image('Bullet3', 'src/assets/Bullet3.png');
+        this.game.load.image('Bullet4', 'src/assets/Bullet4.png');
+
         this.game.load.image('Asteroid', 'src/assets/Asteroid.png');
+
+        this.game.load.image('Explosion', 'src/assets/Explosion.png');
     }
 
     //Setup Game
@@ -80,6 +94,7 @@ class MainState extends Phaser.State {
         });
 
         MainState.instance.socket.on("asteroids", (asteroidsData) => {
+            //console.log("Create Asteroids Received");
             this.createAsteroids(asteroidsData)
         });
 
@@ -92,6 +107,10 @@ class MainState extends Phaser.State {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
         this.game.stage.disableVisibilityChange = true;
+
+        this.game.scale.pageAlignHorizontally = true;
+        this.game.scale.pageAlignVertically = true;
+        this.game.scale.refresh();
 
         //Initialize Groups
         this.playerMotherShipGroup = this.game.add.group();
@@ -194,7 +213,7 @@ class MainState extends Phaser.State {
                 break;
             }
 
-        this.motherShips[index] = new MotherShip(this.game, this.localPlayerName, playerMotherShip, index, 'MotherShip');
+        this.motherShips[index] = new MotherShip(this.game, this.localPlayerName, playerMotherShip, index, 'MotherShip' + (index + 1).toString());
 
         if (playerMotherShip)
             this.playerMotherShipIndex = index;
@@ -207,7 +226,7 @@ class MainState extends Phaser.State {
 
         //Created Ships Asked
         for (let i = 0; i < shipsCount; i++) {
-            this.motherShips[index].ships[i] = new Ship(this.game, playerMotherShip, this.motherShips[index], i, 'Ship');
+            this.motherShips[index].ships[i] = new Ship(this.game, playerMotherShip, this.motherShips[index], i, 'Ship' + (index + 1).toString());
 
             //Set Group
             if (playerMotherShip) {
@@ -273,6 +292,8 @@ class MainState extends Phaser.State {
         this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.enemiesShipsGroup, this.bulletAgainstShip.bind(this), null, this);
         this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerShipsGroup, this.bulletAgainstShip.bind(this), null, this);
         this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerMotherShipGroup, this.bulletAgainstMotherShip.bind(this), null, this);
+
+        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.asteroidsGroup, function (bullet, asteroid) { bullet.kill(); }.bind(this), null, this);
     }
 
     shipAgainstMotherShip(ship: Ship, motherShip: MotherShip) {
@@ -387,8 +408,9 @@ class MainState extends Phaser.State {
                     }
         }
 
-        for (let i = 0; i < this.asteroids.length; i++)
-            this.game.debug.body(this.asteroids[i]);
+        for (let i = 0; i < this.asteroids.length; i++) {
+            //this.game.debug.body(this.asteroids[i]);
+        }
     }
 
 

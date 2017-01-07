@@ -7,7 +7,7 @@ var Asteroid = (function (_super) {
     __extends(Asteroid, _super);
     function Asteroid(game, asset, asteroidsData, index) {
         var _this = _super.call(this, game, 0, 0, asset) || this;
-        _this.drag = 8000;
+        _this.drag = 20;
         _this.mass = 1;
         _this.collider = 0.5;
         _this.asteroidSize = { min: 30, max: 90 };
@@ -30,7 +30,7 @@ var Asteroid = (function (_super) {
             _this.y = MainState.instance.randomIntFromInterval(size + _this.positionMargin, screenHeight - size - _this.positionMargin);
         }
         _this.game.physics.arcade.enable(_this);
-        _this.body.drag = _this.drag;
+        _this.body.drag.set(_this.drag);
         //this.body.setCircle(this.width * this.radius, 256 * 0.5, 256 * 0.5);
         _this.body.setSize(256 * _this.collider, 256 * _this.collider, 256 * (1 - _this.collider) * 0.5, 256 * (1 - _this.collider) * 0.5);
         game.add.existing(_this);

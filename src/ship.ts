@@ -134,7 +134,7 @@ class Ship extends Phaser.Sprite {
     }
 
     createWeapon() {
-        this.weapon = this.game.add.weapon(this.weaponsBulletCount, 'Bullet');
+        this.weapon = this.game.add.weapon(this.weaponsBulletCount, 'Bullet' + (this.motherShip.motherShipIndex + 1).toString());
 
         this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         this.weapon.bulletSpeed = this.weaponsBulletSpeed;
@@ -244,6 +244,7 @@ class Ship extends Phaser.Sprite {
     onDeath() {
         if (this.alive) {
             this.destroyShip();
+            new Explosion(this.game, "Explosion", this);
             //console.log("Alive but Destroed Received");
         }
         else {

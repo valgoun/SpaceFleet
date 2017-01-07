@@ -100,7 +100,7 @@ var Ship = (function (_super) {
         return point;
     };
     Ship.prototype.createWeapon = function () {
-        this.weapon = this.game.add.weapon(this.weaponsBulletCount, 'Bullet');
+        this.weapon = this.game.add.weapon(this.weaponsBulletCount, 'Bullet' + (this.motherShip.motherShipIndex + 1).toString());
         this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         this.weapon.bulletSpeed = this.weaponsBulletSpeed;
         this.weapon.fireRate = this.weaponsFireRate;
@@ -187,6 +187,7 @@ var Ship = (function (_super) {
     Ship.prototype.onDeath = function () {
         if (this.alive) {
             this.destroyShip();
+            new Explosion(this.game, "Explosion", this);
         }
         else {
         }
