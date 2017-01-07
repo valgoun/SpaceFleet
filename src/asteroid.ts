@@ -1,6 +1,6 @@
 class Asteroid extends Phaser.Sprite {
 
-    private drag: number = 8000;
+    private drag: number = 20;
     private mass: number = 1;
     private collider: number = 0.5;
 
@@ -37,7 +37,7 @@ class Asteroid extends Phaser.Sprite {
         }
 
         this.game.physics.arcade.enable(this);
-        this.body.drag = this.drag;
+        this.body.drag.set(this.drag);
 
         //this.body.setCircle(this.width * this.radius, 256 * 0.5, 256 * 0.5);
         this.body.setSize(256 * this.collider, 256 * this.collider,

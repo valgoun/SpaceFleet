@@ -134,12 +134,14 @@ class Ship extends Phaser.Sprite {
     }
 
     createWeapon() {
-        this.weapon = this.game.add.weapon(this.weaponsBulletCount, 'Bullet');
+        this.weapon = this.game.add.weapon(this.weaponsBulletCount, 'Bullet' + (this.motherShip.motherShipIndex + 1).toString());
 
         this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         this.weapon.bulletSpeed = this.weaponsBulletSpeed;
         this.weapon.fireRate = this.weaponsFireRate;
         this.weapon.trackSprite(this, 0, 0, true);
+
+        this.weapon.onKill.add(function (bullet) { new Explosion(this.game, "BulletExplosion" + (this.motherShip.motherShipIndex + 1), bullet, 30 * screenWidthRatio); }.bind(this), this);
 
         /*if (this.playerShip) {
             let shootData = { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex };
@@ -228,6 +230,7 @@ class Ship extends Phaser.Sprite {
         //Send Death Data
         MainState.instance.socket.emit("death", { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex });
 
+        new Explosion(this.game, "Explosion", this);
 
         //Reset Ship
         if (this.playerShip) {

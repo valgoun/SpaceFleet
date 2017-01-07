@@ -38,10 +38,24 @@ var MainState = (function (_super) {
     };
     //Load Images For Sprites
     MainState.prototype.preload = function () {
-        this.game.load.image('Ship', 'src/assets/Ship.png');
-        this.game.load.image('MotherShip', 'src/assets/MotherShip.png');
-        this.game.load.image('Bullet', 'src/assets/Bullet.png');
+        this.game.load.image('Ship1', 'src/assets/Ship1.png');
+        this.game.load.image('Ship2', 'src/assets/Ship2.png');
+        this.game.load.image('Ship3', 'src/assets/Ship3.png');
+        this.game.load.image('Ship4', 'src/assets/Ship4.png');
+        this.game.load.image('MotherShip1', 'src/assets/MotherShip1.png');
+        this.game.load.image('MotherShip2', 'src/assets/MotherShip2.png');
+        this.game.load.image('MotherShip3', 'src/assets/MotherShip3.png');
+        this.game.load.image('MotherShip4', 'src/assets/MotherShip4.png');
+        this.game.load.image('Bullet1', 'src/assets/Bullet1.png');
+        this.game.load.image('Bullet2', 'src/assets/Bullet2.png');
+        this.game.load.image('Bullet3', 'src/assets/Bullet3.png');
+        this.game.load.image('Bullet4', 'src/assets/Bullet4.png');
         this.game.load.image('Asteroid', 'src/assets/Asteroid.png');
+        this.game.load.image('Explosion', 'src/assets/Explosion.png');
+        this.game.load.image('BulletExplosion1', 'src/assets/BulletExplosion1.png');
+        this.game.load.image('BulletExplosion2', 'src/assets/BulletExplosion2.png');
+        this.game.load.image('BulletExplosion3', 'src/assets/BulletExplosion3.png');
+        this.game.load.image('BulletExplosion4', 'src/assets/BulletExplosion4.png');
     };
     //Setup Game
     MainState.prototype.create = function () {
@@ -50,6 +64,7 @@ var MainState = (function (_super) {
             _this.everyoneReady(playerName);
         });
         MainState.instance.socket.on("asteroids", function (asteroidsData) {
+            //console.log("Create Asteroids Received");
             _this.createAsteroids(asteroidsData);
         });
         //Initialize Arrays
@@ -59,6 +74,9 @@ var MainState = (function (_super) {
         this.asteroids = [];
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.disableVisibilityChange = true;
+        this.game.scale.pageAlignHorizontally = true;
+        this.game.scale.pageAlignVertically = true;
+        this.game.scale.refresh();
         //Initialize Groups
         this.playerMotherShipGroup = this.game.add.group();
         this.enemiesMotherShipsGroup = this.game.add.group();
@@ -147,7 +165,7 @@ var MainState = (function (_super) {
                 index = i;
                 break;
             }
-        this.motherShips[index] = new MotherShip(this.game, this.localPlayerName, playerMotherShip, index, 'MotherShip');
+        this.motherShips[index] = new MotherShip(this.game, this.localPlayerName, playerMotherShip, index, 'MotherShip' + (index + 1).toString());
         if (playerMotherShip)
             this.playerMotherShipIndex = index;
         //Set Group
@@ -157,7 +175,7 @@ var MainState = (function (_super) {
             this.enemiesMotherShipsGroup.add(this.motherShips[index]);
         //Created Ships Asked
         for (var i = 0; i < shipsCount; i++) {
-            this.motherShips[index].ships[i] = new Ship(this.game, playerMotherShip, this.motherShips[index], i, 'Ship');
+            this.motherShips[index].ships[i] = new Ship(this.game, playerMotherShip, this.motherShips[index], i, 'Ship' + (index + 1).toString());
             //Set Group
             if (playerMotherShip) {
                 this.playerShipsGroup.add(this.motherShips[index].ships[i]);
@@ -209,6 +227,7 @@ var MainState = (function (_super) {
         this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.enemiesShipsGroup, this.bulletAgainstShip.bind(this), null, this);
         this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerShipsGroup, this.bulletAgainstShip.bind(this), null, this);
         this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.playerMotherShipGroup, this.bulletAgainstMotherShip.bind(this), null, this);
+        this.game.physics.arcade.overlap(this.weaponsBulletsGroup, this.asteroidsGroup, function (bullet, asteroid) { bullet.kill(); }.bind(this), null, this);
     };
     MainState.prototype.shipAgainstMotherShip = function (ship, motherShip) {
         //console.log("Ship vs MotherShip !");
@@ -296,8 +315,8 @@ var MainState = (function (_super) {
                     if (typeof this.motherShips[i].ships[j] !== 'undefined' && this.motherShips[i].ships[j].alive) {
                     }
         }
-        for (var i = 0; i < this.asteroids.length; i++)
-            this.game.debug.body(this.asteroids[i]);
+        for (var i = 0; i < this.asteroids.length; i++) {
+        }
     };
     return MainState;
 }(Phaser.State));

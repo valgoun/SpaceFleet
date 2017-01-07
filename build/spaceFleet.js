@@ -4,8 +4,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 //Global Screen Variables
-var screenWidth = 1024;
-var screenHeight = 576;
+var screenWidth = 1600;
+var screenHeight = 900;
 var screenWidthRatio = 1 + ((this.screenWidth - 1024) / 1024);
 var SpaceFleet = (function (_super) {
     __extends(SpaceFleet, _super);

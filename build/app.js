@@ -68,6 +68,9 @@ var Server = (function () {
         socket.on('moveAsteroid', function (asteroidsData) {
             _this.onMoveAsteroid(asteroidsData, socket);
         });
+        socket.on('explosion', function (explosionData) {
+            _this.onExplosion(explosionData, socket);
+        });
     };
     Server.prototype.OnFleetName = function (name, socket) {
         console.log("------------------------------");
@@ -281,6 +284,19 @@ var Server = (function () {
             })[0];
             if (g) {
                 socket.to(g.Name).broadcast.emit("moveAsteroid", asteroidsData);
+            }
+        }
+    };
+    Server.prototype.onExplosion = function (explosionData, socket) {
+        var p = this.players.filter(function (val) {
+            return val.socket === socket;
+        })[0];
+        if (p) {
+            var g = this.Games.filter(function (val) {
+                return val.Players.indexOf(p.name) !== -1;
+            })[0];
+            if (g) {
+                socket.to(g.Name).broadcast.emit("explosion", explosionData);
             }
         }
     };
