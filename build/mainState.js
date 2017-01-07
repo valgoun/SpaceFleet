@@ -52,6 +52,10 @@ var MainState = (function (_super) {
         this.game.load.image('Bullet4', 'src/assets/Bullet4.png');
         this.game.load.image('Asteroid', 'src/assets/Asteroid.png');
         this.game.load.image('Explosion', 'src/assets/Explosion.png');
+        this.game.load.image('BulletExplosion1', 'src/assets/BulletExplosion1.png');
+        this.game.load.image('BulletExplosion2', 'src/assets/BulletExplosion2.png');
+        this.game.load.image('BulletExplosion3', 'src/assets/BulletExplosion3.png');
+        this.game.load.image('BulletExplosion4', 'src/assets/BulletExplosion4.png');
     };
     //Setup Game
     MainState.prototype.create = function () {

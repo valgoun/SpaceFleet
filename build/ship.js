@@ -105,6 +105,7 @@ var Ship = (function (_super) {
         this.weapon.bulletSpeed = this.weaponsBulletSpeed;
         this.weapon.fireRate = this.weaponsFireRate;
         this.weapon.trackSprite(this, 0, 0, true);
+        this.weapon.onKill.add(function (bullet) { new Explosion(this.game, "BulletExplosion" + (this.motherShip.motherShipIndex + 1), bullet, 30 * screenWidthRatio); }.bind(this), this);
         /*if (this.playerShip) {
             let shootData = { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex };
 
@@ -175,6 +176,7 @@ var Ship = (function (_super) {
         this.kill();
         //Send Death Data
         MainState.instance.socket.emit("death", { motherShipIndex: this.motherShip.motherShipIndex, shipIndex: this.shipIndex });
+        new Explosion(this.game, "Explosion", this);
         //Reset Ship
         if (this.playerShip) {
             this.position = this.getShipSpawnPosition();
@@ -187,7 +189,6 @@ var Ship = (function (_super) {
     Ship.prototype.onDeath = function () {
         if (this.alive) {
             this.destroyShip();
-            new Explosion(this.game, "Explosion", this);
         }
         else {
         }
