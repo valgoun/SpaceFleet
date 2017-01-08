@@ -104,8 +104,6 @@ var LobbyClient = (function () {
             console.log("LaunchGame");
             $("Body").width(1024);
             _this.game = new SpaceFleet(_this.socket, _this.LocalName, players);
-            //this.game = new OldGame.SimpleGame();
-            //this.game.setupGame(this.socket, this.LocalName, players);
         });
         this.socket.on("PasswordCheck", function (lobby) {
             var password = prompt("Password", "");

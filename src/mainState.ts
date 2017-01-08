@@ -130,7 +130,9 @@ class MainState extends Phaser.State {
         this.setEventHandlers();
 
         if (this.playerMotherShipIndex === 0)
-            this.createAsteroids();
+            setTimeout(function () {
+                this.createAsteroids();
+            }.bind(this), 0.2 * 1000);
     }
 
     createAsteroids(asteroidsData?) {

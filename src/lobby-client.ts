@@ -125,9 +125,8 @@ class LobbyClient {
             this.ActualLobby.hide();
             console.log("LaunchGame");
             $("Body").width(1024);
+
             this.game = new SpaceFleet(this.socket, this.LocalName, players);
-            //this.game = new OldGame.SimpleGame();
-            //this.game.setupGame(this.socket, this.LocalName, players);
         });
         this.socket.on("PasswordCheck", (lobby: string) => {
             let password = prompt("Password", "");
