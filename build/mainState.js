@@ -88,7 +88,9 @@ var MainState = (function (_super) {
         this.createWinnerText();
         this.setEventHandlers();
         if (this.playerMotherShipIndex === 0)
-            this.createAsteroids();
+            setTimeout(function () {
+                this.createAsteroids();
+            }.bind(this), 0.2 * 1000);
     };
     MainState.prototype.createAsteroids = function (asteroidsData) {
         if (typeof asteroidsData !== 'undefined') {
